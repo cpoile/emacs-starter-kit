@@ -7,3 +7,6 @@
 [submodule "src/ess"]
 	path = src/ess
 	url = https://github.com/emacs-ess/ESS.git
+[submodule "latex-custom-cpoile"]
+	path = latex-custom-cpoile
+	url = https://github.com/cpoile/latex-custom-kjh.git
