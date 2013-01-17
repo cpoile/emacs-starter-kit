@@ -1,7 +1,7 @@
 #+TITLE: Local User Customizations
 #+OPTIONS: toc:nil num:nil ^:nil
 
-* Starter Kit kjhealy
+* Starter Kit cpoile (adapted from kjhealy)
 This file contains very local customizations---ones that in some cases
 you will not be able to just drop in and use because, e.g., they
 involve references to particular files on my own machine. It's
@@ -65,9 +65,10 @@ as turning off the sans-serif heading style that AucTeX defaults to.
 Require maxframe package to conveniently maxmimize the window. Doesn't work with Emacs 23 on Mac.
 
 #+srcname: fullscreen-1
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp 
   (require 'maxframe)
-  (global-set-key (kbd "C-c m") 'x-maximize-frame)  
+  ;(global-set-key (kbd "C-c m") 'x-maximize-frame) 
+  (add-hook 'window-setup-hook 'maximize-frame t)
 #+end_src
 
 **** Option 2
@@ -75,7 +76,7 @@ Fullscreen toggle -- Only works with the (now slightly out-of-date)
 patched emacs build at =git://github.com/typester/emacs.git=.
 
 #+source: fullscreen-2
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp :tangle no
   (global-set-key (kbd "C-c m") 'ns-toggle-fullscreen)
 #+end_src
 
@@ -167,6 +168,43 @@ In dired mode, visit all marked files using. Bound to the "F" key.
 (require 'stripe-buffer)
 (add-hook 'org-mode-hook 'org-table-stripes-enable)
 (add-hook 'dired-mode-hook 'stripe-listify-buffer)  
+#+end_src
+
+*** Recent Files setup
+#+srcname: recentf-setup
+#+begin_src emacs-lisp
+ ;; save recent files
+(setq recentf-save-file (expand-file-name "recentf" "~/.emacs.d/recentf/")
+      recentf-max-saved-items 200
+      recentf-max-menu-items 15)
+(recentf-mode t)  
+#+end_src
+
+*** Editing tweaks
+#+source: editing-gweaks
+#+begin_src emacs-lisp
+  ;; highlight the current line
+  (global-hl-line-mode +1)
+  
+  (require 'volatile-highlights)
+  (volatile-highlights-mode t)
+  
+  ;; note - this should be after volatile-highlights is required
+  ;; add the ability to copy and cut the current line, without marking it
+  (defadvice kill-ring-save (before slick-copy activate compile)
+    "When called interactively with no active region, copy a single line instead."
+    (interactive
+     (if mark-active (list (region-beginning) (region-end))
+       (message "Copied line")
+       (list (line-beginning-position)
+             (line-beginning-position 2)))))
+  
+  (defadvice kill-region (before slick-cut activate compile)
+    "When called interactively with no active region, kill a single line instead."
+    (interactive
+     (if mark-active (list (region-beginning) (region-end))
+       (list (line-beginning-position)
+             (line-beginning-position 2)))))
 #+end_src
 
 ** Local LaTeX settings
@@ -598,7 +636,10 @@ Sometimes useful for getting help on R or Emacs.
 ** Final Custom elements
 Some last tweaks. 
 
-#+srcname: final-custom
+#+#+BEGIN_SRC 
+
+#+END_SRC
+name: final-custom
 #+begin_src emacs-lisp
   ;; Line-spacing tweak (Optimized for PragmataPro)
   (setq-default line-spacing 5)

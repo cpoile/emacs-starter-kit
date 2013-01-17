@@ -5,6 +5,13 @@
 ;; This is the first thing to get loaded.
 ;;
 
+;; Start up the server so future instances don't start new processes
+(server-start)
+
+;; adding melpa so we can get updated packages from github
+;;(add-to-list 'package-archives
+;;             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+
 ;; org-mode windmove compatibility
 (setq org-replace-disputed-keys t)
 
@@ -45,8 +52,11 @@
 ;; Set default font. First one found is selected.
 (cond
  ((eq window-system nil) nil)
+ ((font-existsp "DejaVu Sans Mono")
+  (set-face-attribute 'default nil :height 100 :font "DejaVu Sans Mono"))
  ((font-existsp "PragmataPro")
-  (set-face-attribute 'default nil :height 121 :font "PragmataPro"))
+  (set-face-attribute 'default nil :height 121 :font "PragmataPro")
+  )
  ((font-existsp "Menlo")
   (set-face-attribute 'default nil :height 121 :font "Menlo"))
  ((font-existsp "Consolas")

@@ -28,7 +28,7 @@ load it manually with =M-x load-theme solarized-light=.
 #+begin_src emacs-lisp
   (add-to-list 'custom-theme-load-path "~/.emacs.d/elpa")
   (setq custom-safe-themes t)
-  (load-theme 'solarized-light t)
+  (load-theme 'solarized-dark t)
 #+end_src
 
 ** Window system 
@@ -78,7 +78,7 @@ for information on installing nxhtml see [[http://www.emacswiki.org/emacs/Nxhtml
 Set this to whatever browser you use e.g...
 : ;; (setq browse-url-browser-function 'browse-url-firefox)
 : ;; (setq browse-url-browser-function 'browse-default-macosx-browser)
-: ;; (setq browse-url-browser-function 'browse-default-windows-browser)
+(setq browse-url-browser-function 'browse-default-windows-browser)
 : ;; (setq browse-url-browser-function 'browse-default-kde)
 : ;; (setq browse-url-browser-function 'browse-default-epiphany)
 : ;; (setq browse-url-browser-function 'browse-default-w3m)
@@ -104,11 +104,6 @@ If launching Emacs as in windowing system, show the menu. If launching in a tty/
       (menu-bar-mode -1)
       )
 #+end_src
-
-** Save a list of recent files visited.
-#+begin_emacs-lisp 
-(recentf-mode 1)
-#+end_emacs-lisp
 
 ** Highlight matching parentheses when the point is on them.
 #+srcname: starter-kit-match-parens
@@ -172,7 +167,8 @@ it's possible aspell isn't in your path
 **** Emacs specify spelling program
 - This didn't work at first, possibly because cocoAspell was
   building its dictionary.  Now it seems to work fine.
-#+begin_src emacs-lisp 
+- (Don't need this in windows
+#+begin_src emacs-lisp :tangle no
   (setq ispell-program-name "aspell"
         ispell-dictionary "english"
         ispell-dictionary-alist
