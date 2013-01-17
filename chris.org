@@ -629,7 +629,7 @@ Create =html= files form the =org= sources, to help with documentation. To set u
   (setq ac-modes (append ac-modes '(org-mode))) 
   (ac-config-default)
   (define-key ac-complete-mode-map [tab] 'ac-expand)
-  (require 'ac-R)
+  ;;(require 'ac-R)
   (setq ac-auto-start 4)
   (ac-flyspell-workaround)
   (define-key ac-mode-map (kbd "M-TAB") 'auto-complete)
