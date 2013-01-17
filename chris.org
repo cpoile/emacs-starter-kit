@@ -1,6 +1,7 @@
 #+TITLE: Local User Customizations
 #+OPTIONS: toc:nil num:nil ^:nil
 
+
 * Starter Kit cpoile (adapted from kjhealy)
 This file contains very local customizations---ones that in some cases
 you will not be able to just drop in and use because, e.g., they
@@ -181,30 +182,48 @@ In dired mode, visit all marked files using. Bound to the "F" key.
 #+end_src
 
 *** Editing tweaks
-#+source: editing-gweaks
+#+source: editing-tweaks
 #+begin_src emacs-lisp
-  ;; highlight the current line
-  (global-hl-line-mode +1)
-  
-  (require 'volatile-highlights)
-  (volatile-highlights-mode t)
-  
-  ;; note - this should be after volatile-highlights is required
-  ;; add the ability to copy and cut the current line, without marking it
-  (defadvice kill-ring-save (before slick-copy activate compile)
-    "When called interactively with no active region, copy a single line instead."
-    (interactive
-     (if mark-active (list (region-beginning) (region-end))
-       (message "Copied line")
-       (list (line-beginning-position)
-             (line-beginning-position 2)))))
-  
-  (defadvice kill-region (before slick-cut activate compile)
-    "When called interactively with no active region, kill a single line instead."
-    (interactive
-     (if mark-active (list (region-beginning) (region-end))
-       (list (line-beginning-position)
-             (line-beginning-position 2)))))
+;; It's recommended to create a list of packages in init.el which will
+;; be installed if they are found to not be present:
+;; That way you can be ensured of a consistent experience across
+;; machines.
+;; (from: https://github.com/technomancy/emacs-starter-kit)
+
+(when (not package-archive-contents)
+  (package-refresh-contents))
+
+;; Add in your own as you wish:
+(defvar my-packages '(volatile-highlights)
+  "A list of packages to ensure are installed at launch.")
+
+(dolist (p my-packages)
+  (when (not (package-installed-p p))
+    (package-install p)))
+
+
+   ;; Highlight The Current line
+   (global-hl-line-mode +1)
+   
+   (require 'volatile-highlights)
+   (volatile-highlights-mode t)
+   
+   ;; Note - this should be after volatile-highlights is required
+   ;; add the ability to copy and cut the current line, without marking it
+   (defadvice kill-ring-save (before slick-copy activate compile)
+     "When called interactively with no active region, copy a single line instead."
+     (interactive
+      (if mark-active (list (region-beginning) (region-end))
+        (message "Copied line")
+        (list (line-beginning-position)
+              (line-beginning-position 2)))))
+   
+   (defadvice kill-region (before slick-cut activate compile)
+     "When called interactively with no active region, kill a single line instead."
+     (interactive
+      (if mark-active (list (region-beginning) (region-end))
+        (list (line-beginning-position)
+              (line-beginning-position 2)))))
 #+end_src
 
 ** Local LaTeX settings
@@ -244,28 +263,28 @@ Tell RefTeX where the bibliography files are.
 
 #+srcname: local-reftex
 #+begin_src emacs-lisp    
-    ;; Make RefTex able to find my local bib files
-    (setq reftex-bibpath-environment-variables
-    '("~/My Documents/TeX-bibs"))
-
-    ;; Default bibliography
-    (setq reftex-default-bibliography
-    '("~/My Documents/TeX-bibs/ob-mis.bib"))
-
-
-    ;; CDLaTex minor mode: tab-trigger environments, paired paren
-    ;; insertion, etc
-    ;; (autoload 'cdlatex-mode "cdlatex" "CDLaTeX Mode" t)
-    ;; (autoload 'turn-on-cdlatex "cdlatex" "CDLaTeX Mode" nil)
-    ;; (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX
-    ;;                                         ; mode
-
-    ;; set which characters are autopaired // Doesn't work. Set in custom, below.
-    ;; (add-hook 'cdlatex-mode-hook
-    ;;   (function (lambda ()
-    ;;               (setq cdlatex-paired-parens
-    ;;                     '("$[{("))
-    ;;             )))
+  ;; Make RefTex able to find my local bib files
+  (setq reftex-bibpath-environment-variables
+  '("~/My Documents/TeX-bibs"))
+  
+  ;; Default bibliography
+  (setq reftex-default-bibliography
+  '("~/My Documents/TeX-bibs/ob-mis.bib"))
+  
+  
+  ;; CDLaTex minor mode: tab-trigger environments, paired paren
+  ;; insertion, etc
+  ;; (autoload 'cdlatex-mode "cdlatex" "CDLaTeX Mode" t)
+  ;; (autoload 'turn-on-cdlatex "cdlatex" "CDLaTeX Mode" nil)
+  ;; (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX
+  ;;                                         ; mode
+  
+  ;; set which characters are autopaired // Doesn't work. Set in custom, below.
+  ;; (add-hook 'cdlatex-mode-hook
+  ;;   (function (lambda ()
+  ;;               (setq cdlatex-paired-parens
+  ;;                     '("$[{("))
+  ;;             )))
 #+end_src
 
 *** Local vc commands
