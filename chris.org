@@ -660,9 +660,6 @@ Some last tweaks.
 #+END_SRC
 name: final-custom
 #+begin_src emacs-lisp
-  ;; Line-spacing tweak (Optimized for PragmataPro)
-  (setq-default line-spacing 5)
-  
   ;; minimize fringe
   (setq-default indicate-empty-lines nil)
   

@@ -10,3 +10,9 @@
 [submodule "latex-custom-cpoile"]
 	path = latex-custom-cpoile
 	url = https://github.com/cpoile/latex-custom-kjh.git
+[submodule "src/python-mode"]
+	path = src/python-mode
+	url = https://github.com/emacsmirror/python-mode.git
+[submodule "src/cdlatex"]
+	path = src/cdlatex
+	url = https://github.com/emacsmirror/cdlatex.git
