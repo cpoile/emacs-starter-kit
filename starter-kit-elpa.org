@@ -27,7 +27,7 @@ The following packages will be downloaded and installed.
                                 'multiple-cursors
                                 'paredit
                                 'python
-								'python-mode
+                                'python-mode
                                 'redo+
                                 'ruby-mode
                                 's
@@ -39,11 +39,12 @@ The following packages will be downloaded and installed.
                                 'yasnippet-bundle
                                 'zenburn-theme
                                 'org-bullets
-								'wc-mode
-								'smooth-scrolling
-								'pandoc-mode
-								'popup
-								'auto-complete
+                                'wc-mode
+                                'smooth-scrolling
+                                'pandoc-mode
+                                'popup
+                                'auto-complete
+                                'undo-tree
                                 )
     "Libraries that should be installed by default.")
 #+end_src

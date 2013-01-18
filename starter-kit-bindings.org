@@ -198,7 +198,7 @@ When windows get out of order, you can rotate them.
 ** Use Option as Meta key
 Use a little bit of Mac keys, but not all of them.
 #+source: mackeys1
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (require 'redo+) 
 (setq mac-command-modifier 'alt mac-option-modifier 'meta)
 (global-set-key [(alt a)] 'mark-whole-buffer)

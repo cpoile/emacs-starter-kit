@@ -1,0 +1,10 @@
+#+TITLE: Local User Customizations
+#+OPTIONS: toc:nil num:nil ^:nil
+
+* Customization for work computer
+** Add specifics
+** Defer to chris.org file as "default"
+#+source: defer-to-default
+#+begin_src emacs-lisp
+  (org-babel-load-file (expand-file-name "chris.org" dotfiles-dir))
+#+end_src
