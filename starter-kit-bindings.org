@@ -9,7 +9,7 @@ Key Bindings.
 
 ** Map fn to Hyper
 #+source: fn-to-hyper
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (setq mac-function-modifier 'hyper)
   ;; fix page-up and page-down keys
   

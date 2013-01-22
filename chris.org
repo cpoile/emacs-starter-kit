@@ -211,7 +211,11 @@ In dired mode, visit all marked files using. Bound to the "F" key.
      (if mark-active (list (region-beginning) (region-end))
        (list (line-beginning-position)
              (line-beginning-position 2)))))
-    
+ #+end_src   
+
+*** Undo tree
+#+source: editing-tweaks
+#+begin_src emacs-lisp
   ;; Add undo-tree. Be sure to read how to use it.
   ;; C-_  C-/  (`undo-tree-undo')
   ;;   Undo changes.
@@ -235,6 +239,34 @@ In dired mode, visit all marked files using. Bound to the "F" key.
   (require 'undo-tree)
   (global-undo-tree-mode)
     
+#+end_src
+
+*** Scrolling
+#+source: smooth-scroling
+#+begin_src emacs-lisp
+; these two commands allow smooth scrolling while keeping the cursor still
+; use C-, to scroll up, C-. to scroll down
+; author: Petr Glotov
+
+(defun scroll-one-down ()
+  (interactive)
+  (scroll-down 1)
+  ;(previous-line)
+  )
+
+(defun scroll-one-up ()
+  (interactive)
+  (scroll-up 1)
+  ;(Next-line)
+  )
+;(global-set-key (kbd "C-,") 'scroll-one-down)
+;(global-set-key (kbd "C-.") 'scroll-one-up)  
+#+end_src
+
+*** Display Tweaks
+#+source: display-tweaks
+#+begin_src emacs-lisp
+  (setq default-cursor-type 'bar) 
 #+end_src
 
 ** Local LaTeX settings
@@ -273,7 +305,7 @@ Set up AUCTeX to work with the Skim PDF viewer.
 Tell RefTeX where the bibliography files are. 
 
 #+srcname: local-reftex
-#+begin_src emacs-lisp    
+#+begin_src emacs-lisp  
   ;; Make RefTex able to find my local bib files
   (setq reftex-bibpath-environment-variables
         '("~/Documents/TeX-bibs"))
@@ -374,7 +406,7 @@ Instead of putting these in every org file, put it here once.
   (setq org-startup-folded 'content)
 #+end_src
 
-*** Smart-quote binding
+*** Smart-quote binding (not tangled)
 When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by default. 
 
 #+source: org-mode-smartquote-key
@@ -429,9 +461,86 @@ When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by defa
    setup in each case. There is a good deal of local stuff in this section. The required style files used below are available at https://github.com/kjhealy/latex-custom-kjh. You may need to adjust or remove some of these settings depending on your
    preferences and local configuration.
 
-#+source: orgmode-xelatex-export
+   This is the new version added by cpoile
+#+source: orgmode-latex-export
 #+begin_src emacs-lisp
-    (require 'org-latex)   
+    (require 'org-latex)
+  
+  ;; turn off the default toc behavior; deal with it properly in headers to files.
+  (defun org-export-latex-no-toc (depth)  
+      (when depth
+        (format "%% Org-mode is exporting headings to %s levels.\n"
+                depth)))
+  (setq org-export-latex-format-toc-function 'org-export-latex-no-toc)
+  
+  
+    (unless (boundp 'org-export-latex-classes)
+      (setq org-export-latex-classes nil))
+    (add-to-list 'org-export-latex-classes
+                 '("apamanuscript"
+                   "\\documentclass[man]{apa6}"
+                      ("\\section{%s}" . "\\section*{%s}")
+                      ("\\subsection{%s}" . "\\subsection*{%s}")
+                      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                      ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+    (add-to-list 'org-export-latex-classes
+                 '("acm-proc-article-sp"
+                   "\\documentclass{acm-proc-article-sp}"
+                      ("\\section{%s}" . "\\section*{%s}")
+                      ("\\subsection{%s}" . "\\subsection*{%s}")
+                      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                      ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+    
+      ;; Originally taken from Bruno Tavernier: http://thread.gmane.org/gmane.emacs.orgmode/31150/focus=31432
+      ;; but adapted to use latexmk 4.22 or higher.  
+      (defun my-auto-tex-cmd ()
+        "When exporting from .org with latex, automatically run latex,
+                         pdflatex, or xelatex as appropriate, using latexmk."
+        (let ((texcmd)))
+        ;; default command: pdflatex 
+        (setq texcmd "latexmk -pdflatex=pdflatex -pdf %f")        
+        ;; pdflatex -> .pdf
+        (if (string-match "LATEX_CMD: pdflatex" (buffer-string))
+            (setq texcmd "latexmk -pdflatex=pdflatex -pdf %f"))
+        ;; xelatex -> .pdf
+        (if (string-match "LATEX_CMD: xelatex" (buffer-string))
+            (setq texcmd "latexmk -pdflatex=xelatex  -pdf %f"))
+        ;; LaTeX compilation command
+        (setq org-latex-to-pdf-process (list texcmd)))
+      
+      (add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-cmd)
+      
+      ;; Default packages included in /every/ tex file, latex, pdflatex or xelatex
+  ;    (setq org-export-latex-packages-alist
+  ;          '(("" "graphicx" t)
+  ;            ("" "longtable" nil)
+  ;           ("" "float" )))
+      
+      ;; Custom packages
+  ;    (defun my-auto-tex-parameters ()
+  ;     "Automatically select the tex packages to include. See https://github.com/kjhealy/latex-custom-kjh for the support files included here."
+  ;      ;; default packages for ordinary latex or pdflatex export
+  ;      (setq org-export-latex-default-packages-alist
+  ;            '(("AUTO" "inputenc" t)
+                ;("minted,minion" "org-preamble-pdflatex" t)))        
+  ;              ("minion" "org-preamble-pdflatex" t)))        
+        ;; Packages to include when xelatex is used
+  ;      (if (string-match "LATEX_CMD: xelatex" (buffer-string))
+  ;          (setq org-export-latex-default-packages-alist
+                  ;;'(("minted" "org-preamble-xelatex" t) ))))
+  ;                '(("minted" "org-preamble-xelatex" t) ))))
+    
+  ;   (add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-parameters)      
+    
+#+end_src
+
+
+#+source: orgmode-xelatex-export
+#+begin_src emacs-lisp :tangle no
+  (require 'org-latex)   
     ;; Choose either listings or minted for exporting source code blocks.
     ;; Using minted (as here) requires pygments be installed. To use the
     ;; default listings package instead, use
@@ -476,13 +585,13 @@ When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by defa
                        pdflatex, or xelatex as appropriate, using latexmk."
       (let ((texcmd)))
       ;; default command: pdflatex 
-      (setq texcmd "latexmk -pdflatex='pdflatex --shell-escape' -pdf %f")        
+      (setq texcmd "latexmk -pdflatex=pdflatex -pdf %f")        
       ;; pdflatex -> .pdf
       (if (string-match "LATEX_CMD: pdflatex" (buffer-string))
-          (setq texcmd "latexmk -pdflatex='pdflatex --shell-escape' -pdf %f"))
+          (setq texcmd "latexmk -pdflatex=pdflatex -pdf %f"))
       ;; xelatex -> .pdf
       (if (string-match "LATEX_CMD: xelatex" (buffer-string))
-          (setq texcmd "latexmk -pdflatex='xelatex --shell-escape' -pdf %f"))
+          (setq texcmd "latexmk -pdflatex=xelatex  -pdf %f"))
       ;; LaTeX compilation command
       (setq org-latex-to-pdf-process (list texcmd)))
     
@@ -507,7 +616,7 @@ When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by defa
                 '(("minted" "org-preamble-xelatex" t) ))))
     
     (add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-parameters)      
-#+end_src
+#+End_src
 
 *** ebib and citation settings
     ebib is a bibtex database manager that works inside emacs. It can
@@ -630,6 +739,9 @@ Create =html= files form the =org= sources, to help with documentation. To set u
   
 #+end_src
 
+** Org-mode / GTD Settings
+*** 
+   
 ** Auto-complete mode
    Powerful autocompletion; experimentally added. Will pop-up
    autocomplete suggestions as you type; hit =TAB= to complete, or
@@ -660,7 +772,7 @@ Create =html= files form the =org= sources, to help with documentation. To set u
   
 #+end_src
 
-** IRC
+*** IRC
 Sometimes useful for getting help on R or Emacs. 
 #+source: rirc-configuration
 #+begin_src emacs-lisp
@@ -670,7 +782,7 @@ Sometimes useful for getting help on R or Emacs.
                        '("irc.freenode.net"))
 #+end_src
 
-** Final Custom elements
+*** Final Custom elements
 Some last tweaks. 
 
 #+#+BEGIN_SRC 
@@ -696,8 +808,8 @@ name: final-custom
   ;; If there is more than one, they won't work right.
   '(LaTeX-XeTeX-command "xelatex -synctex=1")
   '(TeX-engine (quote xetex))
-  '(TeX-view-program-list (quote (("Skim" "/Applications/Skim.app/Contents/SharedSupport/displayline %n %o %b"))))
-  '(TeX-view-program-selection (quote (((output-dvi style-pstricks) "dvips and gv") (output-dvi "xdvi") (output-pdf "Skim") (output-html "xdg-open"))))
+  '(TeX-view-program-list (quote (("AdobeReader" "/Program Files (x86)/Adobe/Acrobat 9.0/Acrobat %n %o %b"))))
+  '(TeX-view-program-selection (quote (((output-dvi style-pstricks) "dvips and gv") (output-dvi "xdvi") (output-pdf "AdobeReader") (output-html "xdg-open"))))
   '(show-paren-mode t)
   '(blink-cursor-mode nil)
   '(text-mode-hook (quote (text-mode-hook-identify)))

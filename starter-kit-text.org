@@ -52,8 +52,8 @@ Mardown and Pandoc, as well as spellchecking and line-wrapping.
   (fill-paragraph nil)))
   (global-set-key (kbd "<f6>") 'unfill-paragraph)
   
-  ;; smooth-scrolling 
-  (require 'smooth-scrolling)
+   ;; smooth-scrolling 
+ (require 'smooth-scrolling)
   
   ;; more smooth efforts.
   (setq-default 
