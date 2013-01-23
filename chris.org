@@ -269,6 +269,13 @@ In dired mode, visit all marked files using. Bound to the "F" key.
   (setq default-cursor-type 'bar) 
 #+end_src
 
+*** Workgroups
+#+begin_src emacs-lisp
+  (require 'workgroups)
+  (setq wg-prefix-key (kbd "C-c w"))
+  (workgroups-mode 1)
+  ;;(wg-load "~/Documents/Emacs - setup - reference/workgroups/")
+#+end_src
 ** Local LaTeX settings
 *** In-text Smart Quotes (XeLaTeX only)
     Redefine TeX-open-quote and TeX-close-quote to be smart quotes by default. Below, in the local org-mode settings, we'll also map the relevant function to a key we can use in org-mode, too. If you don't use XeLaTeX for processing all your =.tex= files, you should disable this option.
