@@ -211,7 +211,11 @@ In dired mode, visit all marked files using. Bound to the "F" key.
      (if mark-active (list (region-beginning) (region-end))
        (list (line-beginning-position)
              (line-beginning-position 2)))))
- #+end_src   
+  
+  ;; I use single spaces between paragraphs, so I will have to put up with
+  ;; "forward-sentence" picking up abbreviations and titles as sentence endings.
+  (setq sentence-end-double-space nil)
+#+end_src   
 
 *** Undo tree
 #+source: editing-tweaks
@@ -269,8 +273,8 @@ In dired mode, visit all marked files using. Bound to the "F" key.
   (setq default-cursor-type 'bar) 
   
    ;;(set-frame-parameter (selected-frame) 'alpha '(<active> [<inactive>]))
-  (set-frame-parameter (selected-frame) 'alpha '(90 50))
-  (add-to-list 'default-frame-alist '(alpha 90 50))
+ ;; (set-frame-parameter (selected-frame) 'alpha '(90 50))
+;;  (add-to-list 'default-frame-alist '(alpha 90 50))
   
    ;; after you’ve set the alpha as above to assign a toggle to “C-c t”
   (eval-when-compile (require 'cl))
@@ -289,7 +293,7 @@ In dired mode, visit all marked files using. Bound to the "F" key.
   (require 'workgroups)
   (setq wg-prefix-key (kbd "C-c w"))
   (workgroups-mode 1)
-  ;;(wg-load "~/Documents/Emacs - setup - reference/workgroups/")
+  (wg-load "~/Documents/Emacs - setup - reference/workgroups/workgroups")
 #+end_src
 ** Local LaTeX settings
 *** In-text Smart Quotes (XeLaTeX only)
@@ -428,6 +432,15 @@ Instead of putting these in every org file, put it here once.
   (setq org-startup-folded 'content)
 #+end_src
 
+*** Flyspell
+#+begin_src emacs-lisp
+  ;; Flyspell mode in org-mode
+  (add-hook 'org-mode-hook 'enable-flyspell)
+  
+  ;; recognize latex code as something that is not mispelled
+  ;;(add-hook 'org-mode-hook (lambda () (setq ispell-parser 'tex)))
+#+end_src
+
 *** Smart-quote binding (not tangled)
 When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by default. 
 
@@ -486,77 +499,78 @@ When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by defa
    This is the new version added by cpoile
 #+source: orgmode-latex-export
 #+begin_src emacs-lisp
-    (require 'org-latex)
-  
-  ;; turn off the default toc behavior; deal with it properly in headers to files.
-  (defun org-export-latex-no-toc (depth)  
-      (when depth
-        (format "%% Org-mode is exporting headings to %s levels.\n"
-                depth)))
-  (setq org-export-latex-format-toc-function 'org-export-latex-no-toc)
-  
-  
-    (unless (boundp 'org-export-latex-classes)
-      (setq org-export-latex-classes nil))
-    (add-to-list 'org-export-latex-classes
-                 '("apamanuscript"
-                   "\\documentclass[man]{apa6}"
-                      ("\\section{%s}" . "\\section*{%s}")
-                      ("\\subsection{%s}" . "\\subsection*{%s}")
-                      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-                      ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-
-    (add-to-list 'org-export-latex-classes
-                 '("acm-proc-article-sp"
-                   "\\documentclass{acm-proc-article-sp}"
-                      ("\\section{%s}" . "\\section*{%s}")
-                      ("\\subsection{%s}" . "\\subsection*{%s}")
-                      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-                      ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-    
-      ;; Originally taken from Bruno Tavernier: http://thread.gmane.org/gmane.emacs.orgmode/31150/focus=31432
-      ;; but adapted to use latexmk 4.22 or higher.  
-      (defun my-auto-tex-cmd ()
-        "When exporting from .org with latex, automatically run latex,
-                         pdflatex, or xelatex as appropriate, using latexmk."
-        (let ((texcmd)))
-        ;; default command: pdflatex 
-        (setq texcmd "latexmk -pdflatex=pdflatex -pdf %f")        
-        ;; pdflatex -> .pdf
-        (if (string-match "LATEX_CMD: pdflatex" (buffer-string))
-            (setq texcmd "latexmk -pdflatex=pdflatex -pdf %f"))
-        ;; xelatex -> .pdf
-        (if (string-match "LATEX_CMD: xelatex" (buffer-string))
-            (setq texcmd "latexmk -pdflatex=xelatex  -pdf %f"))
-        ;; LaTeX compilation command
-        (setq org-latex-to-pdf-process (list texcmd)))
+        (require 'org-latex)
       
-      (add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-cmd)
+      ;; turn off the default toc behavior; deal with it properly in headers to files.
+      (defun org-export-latex-no-toc (depth)  
+          (when depth
+            (format "%% Org-mode is exporting headings to %s levels.\n"
+                    depth)))
+      (setq org-export-latex-format-toc-function 'org-export-latex-no-toc)
       
-      ;; Default packages included in /every/ tex file, latex, pdflatex or xelatex
-  ;    (setq org-export-latex-packages-alist
-  ;          '(("" "graphicx" t)
-  ;            ("" "longtable" nil)
-  ;           ("" "float" )))
       
-      ;; Custom packages
-  ;    (defun my-auto-tex-parameters ()
-  ;     "Automatically select the tex packages to include. See https://github.com/kjhealy/latex-custom-kjh for the support files included here."
-  ;      ;; default packages for ordinary latex or pdflatex export
-  ;      (setq org-export-latex-default-packages-alist
-  ;            '(("AUTO" "inputenc" t)
-                ;("minted,minion" "org-preamble-pdflatex" t)))        
-  ;              ("minion" "org-preamble-pdflatex" t)))        
-        ;; Packages to include when xelatex is used
-  ;      (if (string-match "LATEX_CMD: xelatex" (buffer-string))
-  ;          (setq org-export-latex-default-packages-alist
-                  ;;'(("minted" "org-preamble-xelatex" t) ))))
-  ;                '(("minted" "org-preamble-xelatex" t) ))))
-    
-  ;   (add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-parameters)      
-    
+        (unless (boundp 'org-export-latex-classes)
+          (setq org-export-latex-classes nil))
+        (add-to-list 'org-export-latex-classes
+                     '("apamanuscript"
+                       "\\documentclass[man]{apa6}"
+                          ("\\section{%s}" . "\\section*{%s}")
+                          ("\\subsection{%s}" . "\\subsection*{%s}")
+                          ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                          ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                          ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+        
+       (add-to-list 'org-export-latex-classes
+                     '("tuftehandout"
+                       "\\documentclass[nobib]{tufte-handout}
+                        \\usepackage{hyphenat}
+                        \\usepackage[style=apa,sortcites=true,sorting=nyt,
+                          autocite=footnote,backend=biber]{biblatex}
+                        \\usepackage{enumitem}
+                        \\setitemize{itemsep=0pt, parsep=1pt}"
+                          ("\\section{%s}" . "\\section*{%s}")
+                          ("\\subsection{%s}" . "\\subsection*{%s}")))
+        
+          ;; Originally taken from Bruno Tavernier: http://thread.gmane.org/gmane.emacs.orgmode/31150/focus=31432
+          ;; but adapted to use latexmk 4.22 or higher.  
+          (defun my-auto-tex-cmd ()
+            "When exporting from .org with latex, automatically run latex,
+                             pdflatex, or xelatex as appropriate, using latexmk."
+            (let ((texcmd)))
+            ;; default command: pdflatex 
+            (setq texcmd "latexmk -pdflatex=pdflatex -pdf -outdir=%o %f")
+            ;; pdflatex -> .pdf
+            (if (string-match "LATEX_CMD: pdflatex" (buffer-string))
+                (setq texcmd "latexmk -pdflatex=pdflatex -pdf -outdir=%o %f"))
+            ;; xelatex -> .pdf
+            (if (string-match "LATEX_CMD: xelatex" (buffer-string))
+                (setq texcmd "latexmk -pdflatex=xelatex  -pdf -output-directory %o %f"))
+            ;; LaTeX compilation command
+            (setq org-latex-to-pdf-process (list texcmd)))
+          
+          (add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-cmd)
+          
+          ;; Default packages included in /every/ tex file, latex, pdflatex or xelatex
+      ;    (setq org-export-latex-packages-alist
+      ;          '(("" "graphicx" t)
+      ;            ("" "longtable" nil)
+      ;           ("" "float" )))
+          
+          ;; Custom packages
+          (defun my-auto-tex-parameters ()
+           "Automatically select the tex packages to include. These will be in ~/Documents/texmf/tex/latex/misc"
+            ;; default packages for ordinary latex or pdflatex export
+            (setq org-export-latex-default-packages-alist
+                  '(("AUTO" "inputenc" t)
+                    ("" "org-preamble-pdflatex" t))))
+            ;; Packages to include when xelatex is used
+      ;      (if (string-match "LATEX_CMD: xelatex" (buffer-string))
+      ;          (setq org-export-latex-default-packages-alist
+                      ;;'(("minted" "org-preamble-xelatex" t) ))))
+      ;                '(("minted" "org-preamble-xelatex" t) ))))
+        
+         (add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-parameters)      
+        
 #+end_src
 
 

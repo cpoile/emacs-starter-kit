@@ -15,7 +15,7 @@ flyspell doesn't start properly. Putting this customization in
 #+begin_src emacs-lisp
 ;; flyspell-mode does spell-checking on the fly as you type
 ; use aspell instead of ispell
-(setq ispell-program-name "aspell" 
+(setq-default ispell-program-name "aspell" 
       ispell-extra-args '("--sug-mode=ultra"))
 (autoload 'flyspell-mode "flyspell" "On-the-fly spelling checker." t)
 
