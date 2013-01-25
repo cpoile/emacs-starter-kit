@@ -36,7 +36,7 @@ here adjust the height of some headings in Org and LaTeX mode, as well
 as turning off the sans-serif heading style that AucTeX defaults to.
 
 #+srcname: local-settings
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (add-hook 'latex-mode-hook 
             (lambda ()
               (set-face-attribute 'font-latex-sectioning-5-face nil :inherit nil :foreground "#b58900")
@@ -857,3 +857,13 @@ name: final-custom
    
    
    
+** ESS
+*** Set ESS mode
+#+begin_src emacs-lisp
+(defun ess-set-language ()
+  (setq-default ess-language "R")
+  (setq ess-language "R")
+  )
+
+(add-hook 'ess-post-run-hook 'ess-set-language t)
+#+end_src
