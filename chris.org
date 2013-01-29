@@ -36,23 +36,25 @@ here adjust the height of some headings in Org and LaTeX mode, as well
 as turning off the sans-serif heading style that AucTeX defaults to.
 
 #+srcname: local-settings
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
   (add-hook 'latex-mode-hook 
             (lambda ()
               (set-face-attribute 'font-latex-sectioning-5-face nil :inherit nil :foreground "#b58900")
               (set-face-attribute 'font-latex-sectioning-0-face nil :height 3)
               (set-face-attribute 'font-latex-sectioning-1-face nil :height 2)
-              (set-face-attribute 'font-latex-sectioning-2-face nil :height 1.5)
-              (set-face-attribute 'font-latex-sectioning-3-face nil :height 1.2)
-              (set-face-attribute 'font-latex-sectioning-4-face nil :height 1.0)))
+              ;;(set-face-attribute 'font-latex-sectioning-2-face nil :height 1.5)
+              ;;(set-face-attribute 'font-latex-sectioning-3-face nil :height 1.2)
+              ;;(set-face-attribute 'font-latex-sectioning-4-face nil :height 1.0)
+              ))
   
-   (add-hook 'org-mode-hook 
+  (add-hook 'org-mode-hook 
              (lambda ()
                (set-face-attribute 'org-level-1 nil :height 1.5)
                (set-face-attribute 'org-level-2 nil :height 1.2)
-               (set-face-attribute 'org-level-3 nil :height 1.1)
-               (set-face-attribute 'org-level-4 nil :height 1.1)
-               (set-face-attribute 'org-level-5 nil :height 1.1)))
+               ;;(set-face-attribute 'org-level-3 nil :height 1.1)
+               ;;(set-face-attribute 'org-level-4 nil :height 1.1)
+               ;;(set-face-attribute 'org-level-5 nil :height 1.1)
+               ))
 #+end_src
 
 *** Run Emacs in Full Screen
@@ -248,23 +250,25 @@ In dired mode, visit all marked files using. Bound to the "F" key.
 *** Scrolling
 #+source: smooth-scroling
 #+begin_src emacs-lisp
-; these two commands allow smooth scrolling while keeping the cursor still
-; use C-, to scroll up, C-. to scroll down
-; author: Petr Glotov
-
-(defun scroll-one-down ()
-  (interactive)
-  (scroll-down 1)
-  ;(previous-line)
-  )
-
-(defun scroll-one-up ()
-  (interactive)
-  (scroll-up 1)
-  ;(Next-line)
-  )
-;(global-set-key (kbd "C-,") 'scroll-one-down)
-;(global-set-key (kbd "C-.") 'scroll-one-up)  
+  ; these two commands allow smooth scrolling while keeping the cursor still
+  ; use C-, to scroll up, C-. to scroll down
+  ; author: Petr Glotov
+  
+  (defun scroll-one-down ()
+    (interactive)
+    (scroll-down 1)
+    (previous-line)
+    )
+  
+  (defun scroll-one-up ()
+    (interactive)
+    (scroll-up 1)
+    (next-line)
+    )
+  (global-unset-key (kbd "C-,"))
+  (add-hook 'org-mode-hook '(lambda () (local-unset-key (kbd "C-,"))))
+  (global-set-key (kbd "C-,") 'scroll-one-down)
+  (global-set-key (kbd "C-.") 'scroll-one-up)  
 #+end_src
 
 *** Display Tweaks / Transparency
@@ -425,6 +429,16 @@ Tell RefTeX where the bibliography files are.
 #+end_src
 
 ** Local Org-mode Settings
+*** Org mode setup
+ - Settings here and elsewhere are taken from http://doc.norang.ca/org-mode.html
+#+begin_src emacs-lisp
+  ;;
+  ;; Standard key bindings
+  (global-set-key "\C-cl" 'org-store-link)
+  (global-set-key "\C-ca" 'org-agenda)
+  (global-set-key "\C-cb" 'org-iswitchb)
+#+end_src
+
 *** Default startup values
 Instead of putting these in every org file, put it here once.
 #+source: org-defaults
@@ -434,11 +448,24 @@ Instead of putting these in every org file, put it here once.
 
 *** Flyspell
 #+begin_src emacs-lisp
-  ;; Flyspell mode in org-mode
-  (add-hook 'org-mode-hook 'enable-flyspell)
+    ;; Flyspell mode in org-mode
+    ;(add-hook 'org-mode-hook 'enable-flyspell)
+    
+    ;; recognize latex code as something that is not mispelled
+    ;;(add-hook 'org-mode-hook (lambda () (setq ispell-parser 'tex)))
   
-  ;; recognize latex code as something that is not mispelled
-  ;;(add-hook 'org-mode-hook (lambda () (setq ispell-parser 'tex)))
+  ;; easy spell check
+  (global-set-key (kbd "C-<f7>") 'ispell-word)
+  (global-set-key (kbd "C-S-<f7>") 'flyspell-mode)
+  (global-set-key (kbd "S-<f7>") 'flyspell-buffer)
+  (global-set-key (kbd "M-S-<f7>") 'flyspell-check-previous-highlighted-word)
+  (defun flyspell-check-next-highlighted-word ()
+    "Custom function to spell check next highlighted word"
+    (interactive)
+    (flyspell-goto-next-error)
+    (ispell-word)
+    )
+  (global-set-key (kbd "M-<f7>") 'flyspell-check-next-highlighted-word)
 #+end_src
 
 *** Smart-quote binding (not tangled)
@@ -776,8 +803,294 @@ Create =html= files form the =org= sources, to help with documentation. To set u
 #+end_src
 
 ** Org-mode / GTD Settings
-*** 
-   
+ - Settings in this section are taken from http://doc.norang.ca/org-mode.html
+*** Agenda Setup
+#+begin_src emacs-lisp
+  (setq org-agenda-files (quote ("~/Documents/org"
+                                 ;;"~/Documents/org/client1"  
+                                 )))
+#+end_src
+*** Keybindings
+#+BEGIN_SRC emacs-lisp
+  ;; Custom Key Bindings
+  (global-set-key (kbd "<f12>") 'org-agenda)
+  (global-set-key (kbd "<f5>") 'bh/org-todo)
+  (global-set-key (kbd "<S-f5>") 'bh/widen)
+  (global-set-key (kbd "<f7>") 'bh/set-truncate-lines)
+  (global-set-key (kbd "<f8>") 'org-cycle-agenda-files)
+  (global-set-key (kbd "<f9> <f9>") 'bh/show-org-agenda)
+  (global-set-key (kbd "<f9> b") 'bbdb)
+  (global-set-key (kbd "<f9> c") 'calendar)
+  (global-set-key (kbd "<f9> f") 'boxquote-insert-file)
+  ;(global-set-key (kbd "<f9> g") 'gnus)
+  (global-set-key (kbd "<f9> h") 'bh/hide-other)
+  (global-set-key (kbd "<f9> n") 'org-narrow-to-subtree)
+  (global-set-key (kbd "<f9> w") 'widen)
+  (global-set-key (kbd "<f9> u") 'bh/narrow-up-one-level)
+  
+  (global-set-key (kbd "<f9> I") 'bh/punch-in)
+  (global-set-key (kbd "<f9> O") 'bh/punch-out)
+  
+  (global-set-key (kbd "<f9> o") 'bh/make-org-scratch)
+  
+  (global-set-key (kbd "<f9> r") 'boxquote-region)
+  (global-set-key (kbd "<f9> s") 'bh/switch-to-scratch)
+  
+  (global-set-key (kbd "<f9> t") 'bh/insert-inactive-timestamp)
+  ;(global-set-key (kbd "<f9> T") 'tabify)
+  ;(global-set-key (kbd "<f9> U") 'untabify)
+  
+  (global-set-key (kbd "<f9> v") 'visible-mode)
+  (global-set-key (kbd "<f9> SPC") 'bh/clock-in-last-task)
+  (global-set-key (kbd "C-<f9>") 'previous-buffer)
+  (global-set-key (kbd "M-<f9>") 'org-toggle-inline-images)
+  ;(global-set-key (kbd "C-x n r") 'narrow-to-region)
+  (global-set-key (kbd "C-<f10>") 'next-buffer)
+  (global-set-key (kbd "<f11>") 'org-clock-goto)
+  (global-set-key (kbd "C-<f11>") 'org-clock-in)
+  ;(global-set-key (kbd "C-s-<f12>") 'bh/save-then-publish)
+  (global-set-key (kbd "C-M-r") 'org-capture)
+  (global-set-key (kbd "C-c r") 'org-capture)
+  
+  (defun bh/hide-other ()
+    (interactive)
+    (save-excursion
+      (org-back-to-heading 'invisible-ok)
+      (hide-other)
+      (org-cycle)
+      (org-cycle)
+      (org-cycle)))
+  
+  (defun bh/set-truncate-lines ()
+    "Toggle value of truncate-lines and refresh window display."
+    (interactive)
+    (setq truncate-lines (not truncate-lines))
+    ;; now refresh window display (an idiom from simple.el):
+    (save-excursion
+      (set-window-start (selected-window)
+                        (window-start (selected-window)))))
+  
+  (defun bh/make-org-scratch ()
+    (interactive)
+    (find-file "/tmp/publish/scratch.org")
+    (gnus-make-directory "/tmp/publish"))
+  
+  (defun bh/switch-to-scratch ()
+    (interactive)
+    (switch-to-buffer "*scratch*"))
+#+END_SRC
+
+*** =TODO= Keywords, states, selection, triggers
+
+#+BEGIN_SRC emacs-lisp
+(setq org-todo-keywords
+      (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+              (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE"))))
+
+;;(setq org-todo-keyword-faces
+;;      (quote (("TODO" :foreground "red" :weight bold)
+;;              ("NEXT" :foreground "blue" :weight bold)
+;;              ("DONE" :foreground "forest green" :weight bold)
+;;              ("WAITING" :foreground "orange" :weight bold)
+;;              ("HOLD" :foreground "magenta" :weight bold)
+;;              ("CANCELLED" :foreground "forest green" :weight bold)
+;;              ("PHONE" :foreground "forest green" :weight bold))))
+
+(setq org-use-fast-todo-selection t)
+;(setq org-treat-S-cursor-todo-selection-as-state-change nil)
+
+(setq org-todo-state-tags-triggers
+      (quote (("CANCELLED" ("CANCELLED" . t))
+              ("WAITING" ("WAITING" . t))
+              ("HOLD" ("WAITING" . t) ("HOLD" . t))
+              (done ("WAITING") ("HOLD"))
+              ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
+              ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
+              ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
+#+END_SRC
+
+*** Org Capture settings
+
+#+BEGIN_SRC emacs-lisp
+(setq org-directory "~/Documents/org")
+(setq org-default-notes-file "~/Documents/org/inbox.org")
+
+;; Capture templates for: TODO tasks, Notes, appointments, phone calls, and org-protocol
+(setq org-capture-templates
+      (quote (("t" "todo" entry (file "~/Documents/org/inbox.org")
+               "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+              ("r" "respond" entry (file "~/Documents/org/inbox.org")
+               "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+              ("n" "note" entry (file "~/Documents/org/inbox.org")
+               "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+              ("j" "Journal" entry (file+datetree "~/Documents/org/journal.org")
+               "* %?\n%U\n" :clock-in t :clock-resume t)
+              ("w" "org-protocol" entry (file "~/Documents/org/inbox.org")
+               "* TODO Review %c\n%U\n" :immediate-finish t)
+              ("p" "Phone call" entry (file "~/Documents/org/inbox.org")
+               "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
+              ("h" "Habit" entry (file "~/Documents/org/inbox.org")
+               "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"<%Y-%m-%d %a .+1d/3d>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
+
+;; Remove empty LOGBOOK drawers on clock out
+(defun bh/remove-empty-drawer-on-clock-out ()
+  (interactive)
+  (save-excursion
+    (beginning-of-line 0)
+    (org-remove-empty-drawer-at "LOGBOOK" (point))))
+
+(add-hook 'org-clock-out-hook 'bh/remove-empty-drawer-on-clock-out 'append)
+
+
+#+END_SRC
+
+*** Refile settings
+
+#+BEGIN_SRC emacs-lisp
+  ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+  (setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                   (org-agenda-files :maxlevel . 9))))
+  
+  ; Use full outline paths for refile targets - we file directly with IDO
+  (setq org-refile-use-outline-path t)
+  
+  ; Targets complete directly with IDO
+  (setq org-outline-path-complete-in-steps nil)
+  
+  ; Allow refile to create parent tasks with confirmation
+  (setq org-refile-allow-creating-parent-nodes (quote confirm))
+  
+  ; Use IDO for both buffer and file completion and ido-everywhere to t
+  (setq org-completion-use-ido t)
+  (setq ido-everywhere t)
+  (setq ido-max-directory-size 100000)
+  (ido-mode (quote both))
+  
+  ;;;; Refile settings
+  ; Exclude DONE state tasks from refile targets
+  (defun bh/verify-refile-target ()
+    "Exclude todo keywords with a done state from refile targets"
+    (not (member (nth 2 (org-heading-components)) org-done-keywords)))
+  
+  (setq org-refile-target-verify-function 'bh/verify-refile-target)
+#+END_SRC
+
+*** Creating a block agenda viewer
+
+#+begin_src emacs-lisp
+  ;; Do not dim blocked tasks
+  (setq org-agenda-dim-blocked-tasks nil)
+  
+  ;; Compact the block agenda view
+  (setq org-agenda-compact-blocks t)
+  
+  ;; Custom agenda command definitions
+  (setq org-agenda-custom-commands
+        (quote (("N" "Notes" tags "NOTE"
+                 ((org-agenda-overriding-header "Notes")
+                  (org-tags-match-list-sublevels t)))
+                ("h" "Habits" tags-todo "STYLE=\"habit\""
+                 ((org-agenda-overriding-header "Habits")
+                  (org-agenda-sorting-strategy
+                   '(todo-state-down effort-up category-keep))))
+                (" " "Agenda"
+                 ((agenda "" nil)
+                  (tags "REFILE"
+                        ((org-agenda-overriding-header "Tasks to Refile")
+                         (org-tags-match-list-sublevels nil)))
+                  (tags-todo "-CANCELLED/!"
+                             ((org-agenda-overriding-header "Stuck Projects")
+                              (org-agenda-skip-function 'bh/skip-non-stuck-projects)))
+                  (tags-todo "-WAITING-CANCELLED/!NEXT"
+                             ((org-agenda-overriding-header "Next Tasks")
+                              (org-agenda-skip-function 'bh/skip-projects-and-habits-and-single-tasks)
+                              (org-agenda-todo-ignore-scheduled t)
+                              (org-agenda-todo-ignore-deadlines t)
+                              (org-agenda-todo-ignore-with-date t)
+                              (org-tags-match-list-sublevels t)
+                              (org-agenda-sorting-strategy
+                               '(todo-state-down effort-up category-keep))))
+                  (tags-todo "-REFILE-CANCELLED/!-HOLD-WAITING"
+                             ((org-agenda-overriding-header "Tasks")
+                              (org-agenda-skip-function 'bh/skip-project-tasks-maybe)
+                              (org-agenda-todo-ignore-scheduled t)
+                              (org-agenda-todo-ignore-deadlines t)
+                              (org-agenda-todo-ignore-with-date t)
+                              (org-agenda-sorting-strategy
+                               '(category-keep))))
+                  (tags-todo "-HOLD-CANCELLED/!"
+                             ((org-agenda-overriding-header "Projects")
+                              (org-agenda-skip-function 'bh/skip-non-projects)
+                              (org-agenda-sorting-strategy
+                               '(category-keep))))
+                  (tags-todo "-CANCELLED+WAITING/!"
+                             ((org-agenda-overriding-header "Waiting and Postponed Tasks")
+                              (org-agenda-skip-function 'bh/skip-stuck-projects)
+                              (org-tags-match-list-sublevels nil)
+                              (org-agenda-todo-ignore-scheduled 'future)
+                              (org-agenda-todo-ignore-deadlines 'future)))
+                  (tags "-REFILE/"
+                        ((org-agenda-overriding-header "Tasks to Archive")
+                         (org-agenda-skip-function 'bh/skip-non-archivable-tasks)
+                         (org-tags-match-list-sublevels nil))))
+                 nil)
+                ("r" "Tasks to Refile" tags "REFILE"
+                 ((org-agenda-overriding-header "Tasks to Refile")
+                  (org-tags-match-list-sublevels nil)))
+                ("#" "Stuck Projects" tags-todo "-CANCELLED/!"
+                 ((org-agenda-overriding-header "Stuck Projects")
+                  (org-agenda-skip-function 'bh/skip-non-stuck-projects)))
+                ("n" "Next Tasks" tags-todo "-WAITING-CANCELLED/!NEXT"
+                 ((org-agenda-overriding-header "Next Tasks")
+                  (org-agenda-skip-function 'bh/skip-projects-and-habits-and-single-tasks)
+                  (org-agenda-todo-ignore-scheduled t)
+                  (org-agenda-todo-ignore-deadlines t)
+                  (org-agenda-todo-ignore-with-date t)
+                  (org-tags-match-list-sublevels t)
+                  (org-agenda-sorting-strategy
+                   '(todo-state-down effort-up category-keep))))
+                ("R" "Tasks" tags-todo "-REFILE-CANCELLED/!-HOLD-WAITING"
+                 ((org-agenda-overriding-header "Tasks")
+                  (org-agenda-skip-function 'bh/skip-project-tasks-maybe)
+                  (org-agenda-sorting-strategy
+                   '(category-keep))))
+                ("p" "Projects" tags-todo "-HOLD-CANCELLED/!"
+                 ((org-agenda-overriding-header "Projects")
+                  (org-agenda-skip-function 'bh/skip-non-projects)
+                  (org-agenda-sorting-strategy
+                   '(category-keep))))
+                ("w" "Waiting Tasks" tags-todo "-CANCELLED+WAITING/!"
+                 ((org-agenda-overriding-header "Waiting and Postponed tasks"))
+                 (org-tags-match-list-sublevels nil))
+                ("A" "Tasks to Archive" tags "-REFILE/"
+                 ((org-agenda-overriding-header "Tasks to Archive")
+                  (org-agenda-skip-function 'bh/skip-non-archivable-tasks)
+                  (org-tags-match-list-sublevels nil))))))
+#+end_src
+*** Next keyword setting
+#+BEGIN_QUOTE
+=NEXT= keywords are for *tasks* and not *projects*.  I've added a
+function to the todo state change hook and clock in hook so that any
+parent tasks marked =NEXT= automagically change from =NEXT= to =TODO=
+since they are now projects and not tasks.
+#+END_QUOTE 
+
+#+begin_src emacs-lisp
+  (defun bh/mark-next-parent-tasks-todo ()
+    "Visit each parent task and change NEXT states to TODO"
+    (let ((mystate (or (and (fboundp 'org-state)
+                            state)
+                       (nth 2 (org-heading-components)))))
+      (when (equal mystate "NEXT")
+        (save-excursion
+          (while (org-up-heading-safe)
+            (when (member (nth 2 (org-heading-components)) (list "NEXT"))
+              (org-todo "TODO")))))))
+  
+  (add-hook 'org-after-todo-state-change-hook 'bh/mark-next-parent-tasks-todo 'append)
+  (add-hook 'org-clock-in-hook 'bh/mark-next-parent-tasks-todo 'append)
+#+end_src
+
 ** Auto-complete mode
    Powerful autocompletion; experimentally added. Will pop-up
    autocomplete suggestions as you type; hit =TAB= to complete, or
@@ -786,8 +1099,8 @@ Create =html= files form the =org= sources, to help with documentation. To set u
 #+source: auto-complete
 #+begin_src emacs-lisp
   ;; compile it if the .el file is newer 
-  (byte-recompile-directory "~/.emacs.d/src/auto-complete")
-  (byte-recompile-directory "~/.emacs.d/src/auto-complete/dict/ess")
+  ;;(byte-recompile-directory "~/.emacs.d/src/auto-complete")
+  ;;(byte-recompile-directory "~/.emacs.d/src/auto-complete/dict/ess")
   (require 'auto-complete)
   (require 'auto-complete-config)
   (global-auto-complete-mode t)
@@ -800,11 +1113,13 @@ Create =html= files form the =org= sources, to help with documentation. To set u
   (ac-flyspell-workaround)
   (define-key ac-mode-map (kbd "M-TAB") 'auto-complete)
   (setq ac-auto-show-menu 0.8)
+  (define-key ac-completing-map (kbd "M-h") 'ac-quick-help)
   ;; 
-  (set-face-background 'ac-candidate-face "#366060")
-  (set-face-foreground 'ac-selection-face "#1f1f1f")
-  (set-face-background 'ac-selection-face "#8cd0d3")
-  (set-face-foreground 'ac-selection-face "#1f1f1f")
+  
+  ;;(set-face-background 'ac-candidate-face "#366060")
+  ;;(set-face-foreground 'ac-selection-face "#1f1f1f")
+  ;;(set-face-background 'ac-selection-face "#8cd0d3")
+  ;;(set-face-foreground 'ac-selection-face "#1f1f1f")
   
 #+end_src
 
@@ -851,7 +1166,6 @@ name: final-custom
   '(text-mode-hook (quote (text-mode-hook-identify)))
   )
 #+end_src
-   
    
    
    
