@@ -16,3 +16,6 @@
 [submodule "src/cdlatex"]
 	path = src/cdlatex
 	url = https://github.com/emacsmirror/cdlatex.git
+[submodule "src/org-mode"]
+	path = src/org-mode
+	url = git://orgmode.org/org-mode.git

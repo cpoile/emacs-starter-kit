@@ -38,7 +38,7 @@ The following packages will be downloaded and installed.
                                 'yaml-mode
                                 'yasnippet-bundle
                                 'zenburn-theme
-                                'smooth-scrolling
+                                ;'smooth-scrolling
                                 'org-bullets
                                 'wc-mode
                                 'pandoc-mode

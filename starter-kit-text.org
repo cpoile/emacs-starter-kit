@@ -36,35 +36,45 @@ Mardown and Pandoc, as well as spellchecking and line-wrapping.
     document. 
 #+srcname: line-modes
 #+begin_src emacs-lisp
-  (global-visual-line-mode t)
-  ;;; prefer auto-fill to visual line wrap in ESS mode
-  (add-hook 'ess-mode-hook 'turn-on-auto-fill)
-  (add-hook 'inferior-ess-mode-hook 'turn-on-auto-fill) 
+     (global-visual-line-mode t)
+     ;;; prefer auto-fill to visual line wrap in ESS mode
+     (add-hook 'ess-mode-hook 'turn-on-auto-fill)
+     (add-hook 'inferior-ess-mode-hook 'turn-on-auto-fill) 
+     
+     ;;; but turn off auto-fill in tex and markdown
+     (add-hook 'markdown-mode-hook 'turn-off-auto-fill)
+     (add-hook 'latex-mode-hook 'turn-off-auto-fill)
+     
+     ;;; unfill paragraph
+     (defun unfill-paragraph ()
+     (interactive)
+     (let ((fill-column (point-max)))
+     (fill-paragraph nil)))
+     (global-set-key (kbd "<f6>") 'unfill-paragraph)
+     
+      ;; smooth-scrolling 
+    ;(require 'smooth-scrolling)
+     
+     ;; more smooth efforts.
+     ;(setq-default 
+     ;redisplay-dont-pause t
+     ;scroll-margin 7
+     ;scroll-step 1
+     ;scroll-conservatively 10000
+     ;scroll-preserve-screen-position 1
+     ;scroll-up-aggressively 0.01
+     ;scroll-down-aggressively 0.01
+     ;)
+    
+  (setq scroll-step 1)
+  (setq scroll-conservatively 10000)
+  (setq auto-window-vscroll nil)
+  (setq redisplay-dont-pause t)
   
-  ;;; but turn off auto-fill in tex and markdown
-  (add-hook 'markdown-mode-hook 'turn-off-auto-fill)
-  (add-hook 'latex-mode-hook 'turn-off-auto-fill)
-  
-  ;;; unfill paragraph
-  (defun unfill-paragraph ()
-  (interactive)
-  (let ((fill-column (point-max)))
-  (fill-paragraph nil)))
-  (global-set-key (kbd "<f6>") 'unfill-paragraph)
-  
-   ;; smooth-scrolling 
- (require 'smooth-scrolling)
-  
-  ;; more smooth efforts.
-  (setq-default 
-  scroll-conservatively 0
-  scroll-up-aggressively 0.01
-  scroll-down-aggressively 0.01)
-  
-  ;; centered-cursor package in src/
-  ;; (and
-  ;;  (require 'centered-cursor-mode)
-  ;;  (global-centered-cursor-mode +1)) 
+     ;; centered-cursor package in src/
+     ;; (and
+     ;;  (require 'centered-cursor-mode)
+     ;;  (global-centered-cursor-mode +1)) 
 #+end_src
 
 ** Spelling
