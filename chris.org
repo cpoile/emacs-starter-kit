@@ -1391,6 +1391,12 @@ since they are now projects and not tasks.
   (add-hook 'org-clock-in-hook 'bh/mark-next-parent-tasks-todo 'append)
 #+end_src
 
+** Pomodoro
+*** Setup
+#+BEGIN_SRC emacs-lisp
+  (require 'pomodoro)
+  (pomodoro-add-to-mode-line)
+#+END_SRC
 ** Auto-complete mode
    Powerful autocompletion; experimentally added. Will pop-up
    autocomplete suggestions as you type; hit =TAB= to complete, or
@@ -1466,11 +1472,7 @@ name: final-custom
   '(text-mode-hook (quote (text-mode-hook-identify)))
   )
 #+end_src
-   
-   
-   
-   
- 
+    
 ** ESS
 *** Set ESS mode
 #+begin_src emacs-lisp
@@ -1480,4 +1482,7 @@ name: final-custom
   )
 
 (add-hook 'ess-post-run-hook 'ess-set-language t)
+(setq inferior-R-program-name "d:/R/R-2.15.2/bin/x64/Rterm.exe")
 #+end_src
+
+
