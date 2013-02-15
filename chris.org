@@ -268,13 +268,13 @@ In dired mode, visit all marked files using. Bound to the "F" key.
   (defun scroll-one-down ()
     (interactive)
     (scroll-down 1)
-    (previous-line)
+    ;;(previous-line)
     )
   
   (defun scroll-one-up ()
     (interactive)
     (scroll-up 1)
-    (next-line)
+    ;;(next-line)
     )
   (global-unset-key (kbd "C-,"))
   (add-hook 'org-mode-hook '(lambda () (local-unset-key (kbd "C-,"))))
@@ -302,6 +302,8 @@ In dired mode, visit all marked files using. Bound to the "F" key.
         (set-frame-parameter nil 'alpha '(100 100))
       (set-frame-parameter nil 'alpha '(90 50))))
   (global-set-key (kbd "C-c t") 'toggle-transparency)
+  
+  (setq scroll-bar-mode nil)
 #+end_src
 
 *** Workgroups
