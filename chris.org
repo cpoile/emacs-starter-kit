@@ -306,7 +306,7 @@ In dired mode, visit all marked files using. Bound to the "F" key.
   (setq scroll-bar-mode nil)
 #+end_src
 
-*** Workgroups
+*** Workgbroups
 #+begin_src emacs-lisp
   (require 'workgroups)
   (setq wg-prefix-key (kbd "C-c w"))
