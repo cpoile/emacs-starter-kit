@@ -3,8 +3,8 @@
 ;;; nevertheless, you probably don't want to edit it.
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
 (("org-capture-last-stored"
- (filename . "~/Documents/ORG/inbox.org")
- (front-context-string . "* ref 130207dm2 ")
- (rear-context-string . "oryAnalysis.R]]\n")
- (position . 1717))
+ (filename . "~/Documents/ORG/journal.org")
+ (front-context-string . "**** \n     CLOCK")
+ (rear-context-string . "02-20 Wednesday\n")
+ (position . 54))
 )
