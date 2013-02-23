@@ -214,6 +214,28 @@ In dired mode, visit all marked files using. Bound to the "F" key.
        (list (line-beginning-position)
              (line-beginning-position 2)))))
   
+  (defun duplicate-current-line-or-region (arg)
+  "Duplicates the current line or region ARG times.
+If there's no region, the current line will be duplicated. However, if
+there's a region, all lines that region covers will be duplicated."
+  (interactive "p")
+  (let (beg end (origin (point)))
+    (if (and mark-active (> (point) (mark)))
+        (exchange-point-and-mark))
+    (setq beg (line-beginning-position))
+    (if mark-active
+        (exchange-point-and-mark))
+    (setq end (line-end-position))
+    (let ((region (buffer-substring-no-properties beg end)))
+      (dotimes (i arg)
+        (goto-char end)
+        (newline)
+        (insert region)
+        (setq end (point)))
+      (goto-char (+ origin (* (length region) arg) arg)))))
+
+  (global-set-key (kbd "C-c d") 'duplicate-current-line-or-region)
+    
   ;; I use single spaces between paragraphs, so I will have to put up with
   ;; "forward-sentence" picking up abbreviations and titles as sentence endings.
   (setq sentence-end-double-space nil)
@@ -308,29 +330,90 @@ In dired mode, visit all marked files using. Bound to the "F" key.
 
 *** Autosave
 #+BEGIN_SRC emacs-lisp
-    (setq
-     backup-by-copying t      ; don't clobber symlinks
-     delete-old-versions t
-     kept-new-versions 20
-     kept-old-versions 20
-     version-control t       ; use versioned backups
-     auto-save-interval 20
-     auto-save-timeout 15)
-  
-  (custom-set-variables
-    '(auto-save-file-name-transforms '(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'" "~/Documents/.autosaves/\\1" t)))
-    '(backup-directory-alist '((".*" . "~/Documents/.backups/"))))
+  (setq
+   backup-by-copying t      ; don't clobber symlinks
+   delete-old-versions t
+   kept-new-versions 100
+   ;;kept-old-versions 20
+   version-control t       ; use versioned backups
+   vc-make-backup-files t
+   auto-save-interval 20
+   auto-save-timeout 15)
   
   ;; create the autosave dir if necessary, since emacs won't.
-  (make-directory "~/Documents/.autosaves/" t)
+  (make-directory "~/.emacs.d/autosaves/" t)
+  (setq backup-directory-alist
+        `((".*" . "~/.emacs.d/autosaves")))
+  (setq auto-save-file-name-transforms
+        `((".*" "~/.emacs.d/autosaves/\\2" t)))
+  
+  ;; always backup.
+  (defun force-backup-of-buffer ()
+    (setq buffer-backed-up nil))
+  
+  (add-hook 'before-save-hook  'force-backup-of-buffer)
+  
 #+END_SRC
-*** Workgbroups
+*** Workgroups
 #+begin_src emacs-lisp
   (require 'workgroups)
   (setq wg-prefix-key (kbd "C-c w"))
   (workgroups-mode 1)
   (wg-load "~/Documents/Emacs - setup - reference/workgroups/workgroups")
 #+end_src
+*** Use ido-imenu to search local tags
+    From: http://www.masteringemacs.org/articles/2011/01/14/effective-editing-movement/ which referenced: http://www.emacswiki.org/emacs/ImenuMode#toc10
+
+#+BEGIN_SRC emacs-lisp
+ (defun ido-goto-symbol (&optional symbol-list)
+      "Refresh imenu and jump to a place in the buffer using Ido."
+      (interactive)
+      (unless (featurep 'imenu)
+        (require 'imenu nil t))
+      (cond
+       ((not symbol-list)
+        (let ((ido-mode ido-mode)
+              (ido-enable-flex-matching
+               (if (boundp 'ido-enable-flex-matching)
+                   ido-enable-flex-matching t))
+              name-and-pos symbol-names position)
+          (unless ido-mode
+            (ido-mode 1)
+            (setq ido-enable-flex-matching t))
+          (while (progn
+                   (imenu--cleanup)
+                   (setq imenu--index-alist nil)
+                   (ido-goto-symbol (imenu--make-index-alist))
+                   (setq selected-symbol
+                         (ido-completing-read "Symbol? " symbol-names))
+                   (string= (car imenu--rescan-item) selected-symbol)))
+          (unless (and (boundp 'mark-active) mark-active)
+            (push-mark nil t nil))
+          (setq position (cdr (assoc selected-symbol name-and-pos)))
+          (cond
+           ((overlayp position)
+            (goto-char (overlay-start position)))
+           (t
+            (goto-char position)))))
+       ((listp symbol-list)
+        (dolist (symbol symbol-list)
+          (let (name position)
+            (cond
+             ((and (listp symbol) (imenu--subalist-p symbol))
+              (ido-goto-symbol symbol))
+             ((listp symbol)
+              (setq name (car symbol))
+              (setq position (cdr symbol)))
+             ((stringp symbol)
+              (setq name symbol)
+              (setq position
+                    (get-text-property 1 'org-imenu-marker symbol))))
+            (unless (or (null position) (null name)
+                        (string= (car imenu--rescan-item) name))
+              (add-to-list 'symbol-names name)
+              (add-to-list 'name-and-pos (cons name position))))))))
+    (global-set-key "\C-ci" 'ido-goto-symbol) ; or any key you see fit
+#+END_SRC
 ** Local LaTeX settings
 *** In-text Smart Quotes (XeLaTeX only)
     Redefine TeX-open-quote and TeX-close-quote to be smart quotes by default. Below, in the local org-mode settings, we'll also map the relevant function to a key we can use in org-mode, too. If you don't use XeLaTeX for processing all your =.tex= files, you should disable this option.
@@ -1508,16 +1591,18 @@ name: final-custom
 ** ESS
 *** Set ESS mode
 #+begin_src emacs-lisp
-(defun ess-set-language ()
-  (setq-default ess-language "R")
-  (setq ess-language "R")
-  )
-
-(add-hook 'ess-post-run-hook 'ess-set-language t)
-(if (equal user-login-name "Chris")
-    (setq inferior-R-program-name "c:/Program Files/R/R-2.15.2/bin/x64/Rterm.exe")
-  (setq inferior-R-program-name "d:/R/R-2.15.2/bin/x64/Rterm.exe"))
-
+  (defun ess-set-language ()
+    (setq-default ess-language "R")
+    (setq ess-language "R")
+    )
+  
+  (add-hook 'ess-post-run-hook 'ess-set-language t)
+  (if (equal user-login-name "Chris")
+      (setq inferior-R-program-name "c:/Program Files/R/R-2.15.2/bin/x64/Rterm.exe")
+    (setq inferior-R-program-name "d:/R/R-2.15.2/bin/x64/Rterm.exe"))
+  
+  (add-hook 'ess-mode-hook '(lambda () (setq fill-column 100)))
+ 
 #+end_src
 
 
