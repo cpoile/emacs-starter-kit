@@ -185,72 +185,93 @@ In dired mode, visit all marked files using. Bound to the "F" key.
 *** Editing tweaks
 #+source: editing-tweaks
 #+begin_src emacs-lisp
-  ;; It's recommended to create a list of packages in init.el which will
-  ;; be installed if they are found to not be present:
-  ;; That way you can be ensured of a consistent experience across
-  ;; machines.
-  ;; (from: https://github.com/technomancy/emacs-starter-kit)
-  
-  ;; Highlight The Current line
-  (global-hl-line-mode +1)
-  
-  (require 'volatile-highlights)
-  (volatile-highlights-mode t)
-  
-  ;; Note - this should be after volatile-highlights is required
-  ;; add the ability to copy and cut the current line, without marking it
-  (defadvice kill-ring-save (before slick-copy activate compile)
-    "When called interactively with no active region, copy a single line instead."
-    (interactive
-     (if mark-active (list (region-beginning) (region-end))
-       (message "Copied line")
-       (list (line-beginning-position)
-             (line-beginning-position 2)))))
-  
-  (defadvice kill-region (before slick-cut activate compile)
-    "When called interactively with no active region, kill a single line instead."
-    (interactive
-     (if mark-active (list (region-beginning) (region-end))
-       (list (line-beginning-position)
-             (line-beginning-position 2)))))
-  
-  (defun duplicate-current-line-or-region (arg)
-  "Duplicates the current line or region ARG times.
-If there's no region, the current line will be duplicated. However, if
-there's a region, all lines that region covers will be duplicated."
-  (interactive "p")
-  (let (beg end (origin (point)))
-    (if (and mark-active (> (point) (mark)))
-        (exchange-point-and-mark))
-    (setq beg (line-beginning-position))
-    (if mark-active
-        (exchange-point-and-mark))
-    (setq end (line-end-position))
-    (let ((region (buffer-substring-no-properties beg end)))
-      (dotimes (i arg)
-        (goto-char end)
-        (newline)
-        (insert region)
-        (setq end (point)))
-      (goto-char (+ origin (* (length region) arg) arg)))))
-
-  (global-set-key (kbd "C-c d") 'duplicate-current-line-or-region)
+    ;; It's recommended to create a list of packages in init.el which will
+    ;; be installed if they are found to not be present:
+    ;; That way you can be ensured of a consistent experience across
+    ;; machines.
+    ;; (from: https://github.com/technomancy/emacs-starter-kit)
     
-  ;; I use single spaces between paragraphs, so I will have to put up with
-  ;; "forward-sentence" picking up abbreviations and titles as sentence endings.
-  (setq sentence-end-double-space nil)
+    ;; Highlight The Current line
+    (global-hl-line-mode +1)
+    
+    (require 'volatile-highlights)
+    (volatile-highlights-mode t)
+    
+    ;; Note - this should be after volatile-highlights is required
+    ;; add the ability to copy and cut the current line, without marking it
+    (defadvice kill-ring-save (before slick-copy activate compile)
+      "When called interactively with no active region, copy a single line instead."
+      (interactive
+       (if mark-active (list (region-beginning) (region-end))
+         (message "Copied line")
+         (list (line-beginning-position)
+               (line-beginning-position 2)))))
+    
+    (defadvice kill-region (before slick-cut activate compile)
+      "When called interactively with no active region, kill a single line instead."
+      (interactive
+       (if mark-active (list (region-beginning) (region-end))
+         (list (line-beginning-position)
+               (line-beginning-position 2)))))
+    
+    (defun duplicate-current-line-or-region (arg)
+    "Duplicates the current line or region ARG times.
+  If there's no region, the current line will be duplicated. However, if
+  there's a region, all lines that region covers will be duplicated."
+    (interactive "p")
+    (let (beg end (origin (point)))
+      (if (and mark-active (> (point) (mark)))
+          (exchange-point-and-mark))
+      (setq beg (line-beginning-position))
+      (if mark-active
+          (exchange-point-and-mark))
+      (setq end (line-end-position))
+      (let ((region (buffer-substring-no-properties beg end)))
+        (dotimes (i arg)
+          (goto-char end)
+          (newline)
+          (insert region)
+          (setq end (point)))
+        (goto-char (+ origin (* (length region) arg) arg)))))
   
-  ;; emulate Intellij Idea's join lines command
-  (defun pull-next-line() 
-    (interactive) 
-    (move-end-of-line 1) 
-    (kill-line)
-    (just-one-space))
-  (global-unset-key (kbd "C-S-j"))
+    (global-set-key (kbd "C-c d") 'duplicate-current-line-or-region)
+      
+    ;; I use single spaces between paragraphs, so I will have to put up with
+    ;; "forward-sentence" picking up abbreviations and titles as sentence endings.
+    (setq sentence-end-double-space nil)
+    
+    ;; emulate Intellij Idea's join lines command
+    (defun pull-next-line() 
+      (interactive) 
+      (move-end-of-line 1) 
+      (kill-line)
+      (just-one-space))
+    (global-unset-key (kbd "C-S-j"))
   (global-set-key (kbd "C-S-j") 'pull-next-line)
-  
-  
-#+end_src   
+  #+end_src   
+
+*** IntelliJ stlyle global back and forward mark
+
+|---------------+------------------------------------------------------------|
+| C-x C-<SPC>   | go back in `global-mark-ring`, respects prefix arg         |
+| C-x C-<left>  | go back in `global-mark-ring`                              |
+| C-x C-<right> | go forward in `global-mark-ring`                           |
+|               |                                                            |
+| C-x <SPC>     | go back in (buffer-local) `mark-ring`, respects prefix arg |
+| C-x <left>    | go back in (buffer-local) `mark-ring`                      |
+| C-x <right>   | go forward in (buffer-local) `mark-ring`                   |
+|---------------+------------------------------------------------------------|
+
+#+BEGIN_SRC emacs-lisp
+  ;; get some IntelliJ-style back-forward movement between marks in a file, or globally
+  (require 'smartrep)
+  (require 'nav-flash)
+  (nav-flash-show)
+  (require 'visible-mark)
+  (visible-mark-mode 1)
+  (require 'back-button)
+  (back-button-mode 1)
+#+END_SRC
 
 *** Undo tree
 #+source: editing-tweaks

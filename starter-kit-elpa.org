@@ -47,6 +47,10 @@ The following packages will be downloaded and installed.
                                 'undo-tree
                                 'workgroups
                                 'backup-walker
+                                'smart-rep
+                                'nav-flash
+                                'visible-mark
+                                'back-button
                                 )
     "Libraries that should be installed by default.")
 #+end_src
