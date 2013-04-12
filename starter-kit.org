@@ -282,6 +282,14 @@ since they are likely to be used in every session
   (require 'recentf)
 #+end_src
 
+And we have to setq yas/root-directory early because packages autoloaded in the starter-kit-elpa.org file will use it.
+
+#+begin_src emacs-lisp 
+  
+#+end_src
+
+
+
 *** Function for loading/compiling starter-kit-*
 #+srcname: starter-kit-load
 #+begin_src emacs-lisp 
@@ -419,25 +427,11 @@ turn off these sections if you don't plan on using the related mode or
 language.
 
 *** Starter kit yasnippet
-[[http://code.google.com/p/yasnippet/][yasnippet]] is yet another snippet expansion system for Emacs.  It is
-inspired by TextMate's templating syntax.
-- watch the [[http://www.youtube.com/watch?v=vOj7btx3ATg][video on YouTube]]
-- see the [[http://yasnippet.googlecode.com/svn/trunk/doc/index.html][intro and tutorial]]
-
-load the yasnippet bundle
+load the yasnippet bundle in [[file:starter-kit-yasnippet.org][starter-kit-snippet]]
 #+begin_src emacs-lisp
-  (add-to-list 'load-path
-               (expand-file-name  "yasnippet"
-                                  (expand-file-name "src"
-                                                    dotfiles-dir)))
-  (require 'yasnippet)
-  (yas/initialize)
+(starter-kit-load "starter-kit-yasnippet.org")
 #+end_src
 
-load the snippets defined in the =./snippets/= directory
-#+begin_src emacs-lisp
-  (yas/load-directory (expand-file-name "snippets" dotfiles-dir))
-#+end_src
 
 *** Starter kit Org-mode
 Located in [[file:starter-kit-org.org][starter-kit-org]]

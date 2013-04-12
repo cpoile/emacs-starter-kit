@@ -4,7 +4,7 @@
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
 (("org-capture-last-stored"
  (filename . "~/Documents/ORG/inbox.org")
- (front-context-string . "* TODO after swi")
- (rear-context-string . "Transformed\")]]\n")
- (position . 5110))
+ (front-context-string . "* TODO fix showe")
+ (rear-context-string . "oryAnalysis.R]]\n")
+ (position . 6550))
 )

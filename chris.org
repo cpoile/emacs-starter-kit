@@ -348,7 +348,19 @@ In dired mode, visit all marked files using. Bound to the "F" key.
   
   (setq scroll-bar-mode nil)
 #+end_src
-
+*** Remove '^M' dos eol characters
+In mixed dos/unix files and buffers (like NRepl)
+#+source: remove-^M
+#+begin_src emacs-lisp
+  (defun remove-dos-eol ()
+  "Do not show ^M in files containing mixed UNIX and DOS line endings."
+  (interactive)
+  (setq buffer-display-table (make-display-table))
+  (aset buffer-display-table ?\^M []))
+  
+  (add-hook 'nrepl-mode-hook 'remove-dos-eol)
+#+end_src
+  
 *** Autosave
 #+BEGIN_SRC emacs-lisp
   (setq
@@ -362,18 +374,17 @@ In dired mode, visit all marked files using. Bound to the "F" key.
    auto-save-timeout 15)
   
   ;; create the autosave dir if necessary, since emacs won't.
-  (make-directory "~/.emacs.d/autosaves/" t)
+  (make-directory "~/Documents/.autosaves/" t)
   (setq backup-directory-alist
-        `((".*" . "~/.emacs.d/autosaves")))
+        `((".*" . "~/Documents/.autosaves")))
   (setq auto-save-file-name-transforms
-        `((".*" "~/.emacs.d/autosaves/\\2" t)))
+        `((".*" "~/Documents/.autosaves/\\2" t)))
   
   ;; always backup.
   (defun force-backup-of-buffer ()
     (setq buffer-backed-up nil))
   
   (add-hook 'before-save-hook  'force-backup-of-buffer)
-  
 #+END_SRC
 *** Workgroups
 #+begin_src emacs-lisp
@@ -435,6 +446,15 @@ In dired mode, visit all marked files using. Bound to the "F" key.
               (add-to-list 'name-and-pos (cons name position))))))))
     (global-set-key "\C-ci" 'ido-goto-symbol) ; or any key you see fit
 #+END_SRC
+*** Custom misc keymaps
+#+source: custom-keymaps
+#+begin_src emacs-lisp
+  (defun kill-current-buffer ()
+    (interactive)
+    (kill-buffer (current-buffer)))
+  (global-set-key (kbd "<C-f4>") 'kill-current-buffer)
+#+end_src
+
 ** Local LaTeX settings
 *** In-text Smart Quotes (XeLaTeX only)
     Redefine TeX-open-quote and TeX-close-quote to be smart quotes by default. Below, in the local org-mode settings, we'll also map the relevant function to a key we can use in org-mode, too. If you don't use XeLaTeX for processing all your =.tex= files, you should disable this option.
@@ -936,6 +956,30 @@ Create =html= files form the =org= sources, to help with documentation. To set u
     (setq org-export-html-style-extra "") 
     (setq org-export-html-postamble nil)
   
+#+end_src
+
+*** Org-babel and clojure
+Not working yet, as far as I can tell...
+#+begin_src emacs-lisp :tangle no
+;; Patch ob-clojure to work with nrepl
+(declare-function nrepl-send-string-sync "ext:nrepl" (code &optional ns))
+
+(defun org-babel-execute:clojure (body params)
+  "Execute a block of Clojure code with Babel."
+  (require 'nrepl)
+  (with-temp-buffer
+    (insert (org-babel-expand-body:clojure body params))
+    ((lambda (result)
+       (let ((result-params (cdr (assoc :result-params params))))
+         (if (or (member "scalar" result-params)
+                 (member "verbatim" result-params))
+             result
+           (condition-case nil (org-babel-script-escape result)
+             (error result)))))
+     (plist-get (nrepl-send-string-sync
+                 (buffer-substring-no-properties (point-min) (point-max))
+                 (cdr (assoc :package params)))
+                :value))))
 #+end_src
 
 ** Org-mode / GTD Settings
