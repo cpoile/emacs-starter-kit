@@ -36,8 +36,7 @@ The following packages will be downloaded and installed.
                                 'tango-2-theme
                                 'textmate
                                 'yaml-mode
-                                ;;'yasnippet-bundle
-								'yasnippet
+                                ;;'yasnippet-bundle								
                                 'zenburn-theme
                                 ;; 'smooth-scrolling
                                 'org-bullets

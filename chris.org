@@ -348,19 +348,6 @@ In dired mode, visit all marked files using. Bound to the "F" key.
   
   (setq scroll-bar-mode nil)
 #+end_src
-*** Remove '^M' dos eol characters
-In mixed dos/unix files and buffers (like NRepl)
-#+source: remove-^M
-#+begin_src emacs-lisp
-  (defun remove-dos-eol ()
-  "Do not show ^M in files containing mixed UNIX and DOS line endings."
-  (interactive)
-  (setq buffer-display-table (make-display-table))
-  (aset buffer-display-table ?\^M []))
-  
-  (add-hook 'nrepl-mode-hook 'remove-dos-eol)
-#+end_src
-  
 *** Autosave
 #+BEGIN_SRC emacs-lisp
   (setq
@@ -1571,6 +1558,13 @@ since they are now projects and not tasks.
   (add-hook 'org-clock-in-hook 'bh/mark-next-parent-tasks-todo 'append)
 #+end_src
 
+*** Yasnippet
+Turn it on when in org-mode.
+#+begin_src emacs-lisp
+  ;; (add-hook 'org-mode-hook
+  ;;           '(lambda ()
+  ;;              (yas-minor-mode)))
+#+end_src
 ** Pomodoro
 *** Setup
 #+BEGIN_SRC emacs-lisp
@@ -1670,4 +1664,39 @@ name: final-custom
  
 #+end_src
 
-
+** Clojure / Paredit
+*** Keybindings
+#+source: paredit-keybindings
+#+begin_src language
+  
+#+end_src
+#+source: paredit-keybindings
+#+begin_src emacs-lisp
+    ;; override the default keybindings in paredit
+  (eval-after-load 'paredit
+    '(progn
+       (define-key paredit-mode-map (kbd "<M-right>") 'paredit-forward-slurp-sexp)
+       (define-key paredit-mode-map (kbd "<M-left>")  'paredit-forward-barf-sexp)
+       (define-key paredit-mode-map (kbd "<C-right>") 'paredit-forward)
+       (define-key paredit-mode-map (kbd "<C-left>")  'paredit-backward)))
+#+end_src
+*** Remove '^M' dos eol characters
+In mixed dos/unix files and buffers (like NRepl)
+#+source: remove-^M
+#+begin_src emacs-lisp
+  (defun remove-dos-eol ()
+    "Do not show ^M in files containing mixed UNIX and DOS line endings."
+    (interactive)
+    (setq buffer-display-table (make-display-table))
+    (aset buffer-display-table ?\^M []))
+  
+  (add-hook 'nrepl-mode-hook 'remove-dos-eol)
+  (add-hook 'nrepl-connections-buffer-mode-hook 'remove-dos-eol)
+#+end_src
+*** nrepl settings
+#+source: nrepl-settings
+#+begin_src emacs-lisp
+  (add-hook 'nrepl-interaction-mode-hook
+            'nrepl-turn-on-eldoc-mode)
+  (define-key nrepl-interaction-mode-map (kbd "C-c C-d") 'ac-nrepl-popup-doc)
+#+end_src

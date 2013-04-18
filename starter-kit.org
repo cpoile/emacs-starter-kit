@@ -280,12 +280,16 @@ since they are likely to be used in every session
   (require 'uniquify)
   (require 'ansi-color)
   (require 'recentf)
+  (require 'yasnippet)
 #+end_src
 
-And we have to setq yas/root-directory early because packages autoloaded in the starter-kit-elpa.org file will use it.
+And we have to setq yas-snippet-dirs early because packages autoloaded in the starter-kit-elpa.org file will use it.
 
 #+begin_src emacs-lisp 
-  
+  (yas-global-mode 1)
+  (setq yas-snippet-dirs
+        '("~/.emacs.d/snippets"
+          )) 
 #+end_src
 
 
@@ -429,7 +433,7 @@ language.
 *** Starter kit yasnippet
 load the yasnippet bundle in [[file:starter-kit-yasnippet.org][starter-kit-snippet]]
 #+begin_src emacs-lisp
-(starter-kit-load "starter-kit-yasnippet.org")
+;;(starter-kit-load "starter-kit-yasnippet.org")
 #+end_src
 
 

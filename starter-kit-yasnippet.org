@@ -15,6 +15,6 @@ load the snippets defined in the =./snippets/= directory
 	;;      '("~/.emacs.d/snippets"            ;; personal snippets
 	;;	  ))
 
-  (yas-global-mode 1)
+  ;;(yas-global-mode 1)
 #+end_src
 
