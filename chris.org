@@ -1700,3 +1700,10 @@ In mixed dos/unix files and buffers (like NRepl)
             'nrepl-turn-on-eldoc-mode)
   (define-key nrepl-interaction-mode-map (kbd "C-c C-d") 'ac-nrepl-popup-doc)
 #+end_src
+** ERC
+*** Ignore quit join part messages
+They are annoying and push content off the screen.
+#+source: erc-ignore
+#+begin_src emacs-lisp
+  (setq erc-hide-list '("JOIN" "PART" "QUIT"))
+#+end_src

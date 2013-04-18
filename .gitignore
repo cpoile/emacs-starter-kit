@@ -45,3 +45,4 @@ src/auctex-src/*elc
 recentf/
 server/
 /autosaves/*
+var/pcache/ucs-utils
