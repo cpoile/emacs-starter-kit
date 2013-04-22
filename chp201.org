@@ -2,7 +2,8 @@
 #+OPTIONS: toc:nil num:nil ^:nil
 
 * Customization for work computer
-** Add specifics
+** Add specifics#+begin_src emacs-lisp
+
 ** Defer to chris.org file as "default"
 #+source: defer-to-default
 #+begin_src emacs-lisp
