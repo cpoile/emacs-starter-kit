@@ -5,6 +5,11 @@
 ;; This is the first thing to get loaded.
 ;;
 
+;; use our version of org-mode:
+(add-to-list 'load-path "~/.emacs.d/src/org-mode/lisp")
+(require 'org)
+(require 'ob)
+
 ;; Start up the server so future instances don't start new processes
 (server-start)
 

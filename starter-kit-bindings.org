@@ -410,8 +410,8 @@ First mark the word, then add more cursors. To get out of multiple-cursors-mode,
    scroll bars, and no fringe indicators. Useful in conjunction with running Emacs full-screen.
 #+source: minimal-mode
 #+begin_src emacs-lisp
-  (require 'minimal)
-  (global-set-key (kbd "C-c s") 'minimal-mode)
+  ;(require 'minimal)
+  ;(global-set-key (kbd "C-c s") 'minimal-mode)
 #+end_src
 
 ** Closing

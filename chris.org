@@ -734,7 +734,7 @@ In mixed dos/unix files and buffers (like NRepl)
 #+begin_src emacs-lisp
   (add-hook 'nrepl-interaction-mode-hook
             'nrepl-turn-on-eldoc-mode)
-  (define-key nrepl-interaction-mode-map (kbd "C-c C-d") 'ac-nrepl-popup-doc)
+  ;(define-key nrepl-interaction-mode-map (kbd "C-c C-d") 'ac-nrepl-popup-doc)
 #+end_src
 ** ERC
 *** Ignore quit join part messages

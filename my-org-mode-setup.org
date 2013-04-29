@@ -6,17 +6,6 @@ Settings in this section are taken from http://doc.norang.ca/org-mode.html.
 Bernt Hansen's original is in (on my machine, obviously) [[file:~/Documents/ORG/org-mode-doc/org-mode.org]], which is a clone of Bernt's git repo. For updates, =git pull= from his master branch, and then maybe diff with this document to see if any of his recent changes apply? 
 
 ** Local Org-mode Settings, from kjhealy's Original
-*** Org mode setup
- - Settings here and elsewhere are taken from http://doc.norang.ca/org-mode.html
-On this setup, the norang.ca org-mode.html file is cloned from 
-#+begin_src emacs-lisp
-  ;;
-  ;; Standard key bindings
-  (global-set-key "\C-cl" 'org-store-link)
-  (global-set-key "\C-ca" 'org-agenda)
-  (global-set-key "\C-cb" 'org-iswitchb)
-#+end_src
-
 *** Default startup values
 Instead of putting these in every org file, put it here once.
 #+source: org-defaults
@@ -382,13 +371,259 @@ Not working yet, as far as I can tell...
                 :value))))
 #+end_src
 
-** Org-mode / GTD Settings
-*** Agenda Setup
+* Org-mode / GTD Settings
+Settings here and elsewhere are taken from http://doc.norang.ca/org-mode.html
+On this setup, the norang.ca org-mode.html file is cloned into [[file:~/Documents/ORG/org-mode-doc/]].
+This is probably what we want to diff.
+** Agenda Setup
+:PROPERTIES:
+:CUSTOM_ID: AgendaSetup
+:END:
+
+Here is cpoile's custom =org-agenda-files= setup.
+
 #+begin_src emacs-lisp
-  (setq org-agenda-files (quote ("~/Documents/org"
+  (setq org-user-agenda-files (quote ("~/Documents/org/agenda"
                                  ;;"~/Documents/org/client1"  
                                  )))
 #+end_src
+
+
+Here is my current =org-agenda-files= setup.
+#+header: :tangle no
+#+begin_src emacs-lisp
+(setq org-agenda-files (quote ("~/git/org"
+                               "~/git/org/client1"
+                               "~/git/client2")))
+#+end_src
+
+#+header: :tangle yes
+#+begin_src emacs-lisp :exports none
+  ;; The following setting is different from the document so that you
+  ;; can override the document org-agenda-files by setting your
+  ;; org-agenda-files in the variable org-user-agenda-files
+  ;;
+  (if (boundp 'org-user-agenda-files)
+      (setq org-agenda-files org-user-agenda-files)
+    (setq org-agenda-files (quote ("~/git/org"
+                                 "~/git/org/client1"
+                                 "~/git/client2"))))
+#+end_src
+
+=org-mode= manages the =org-agenda-files= variable automatically using
+=C-c [= and =C-c ]= to add and remove files respectively.  However,
+this replaces my directory list with a list of explicit filenames
+instead and is not what I want.  If this occurs then adding a new org
+file to any of the above directories will not contribute to my agenda
+and I will probably miss something important.
+
+I have disabled the =C-c [= and =C-c ]= keys in =org-mode-hook= to
+prevent messing up my list of directories in the =org-agenda-files=
+variable.  I just add and remove directories manually in my =.emacs=
+file.  Changing the list of directories in =org-agenda-files= happens
+very rarely since new files in existing directories are automatically
+picked up.
+
+I also disable the comment function =C-c ;= since I never use those.
+I kept accidentally hitting this key sequence when doing =C-c
+singlequote= for editing source blocks.
+
+In the example above I have =~/git/client2= in a separate git
+repository from ~/git/org.  This gives me the flexibility of leaving
+confidential information at the client site and having all of my
+personal information available everywhere I use org-mode.  I
+synchronize my personal repositories on multiple machines and skip the
+confidential info on the non-client laptop I travel with.
+=org-agenda-files= on this laptop does not include the =~/git/client2=
+directory.
+** Org File Structure
+:PROPERTIES:
+:CUSTOM_ID: OrgFileStructure
+:END:
+
+Most of my org files are set up with level 1 headings as main
+categories only.  Tasks and projects normally start as level 2.
+
+Here are some examples of my level 1 headings in
+
+=todo.org=:
+
+- Special Dates
+
+  Includes level 2 headings for
+
+  - Birthdays
+  - Anniversaries
+  - Holidays
+
+- Finances
+- Health and Recreation
+- House Maintenance
+- Lawn and Garden Maintenance
+- Notes
+- Tasks
+- Vehicle Maintenance
+- Passwords
+
+
+=norang.org=:
+
+- System Maintenance
+- Payroll
+- Accounting
+- Finances
+- Hardware Maintenance
+- Tasks
+- Research and Development
+- Notes
+- Purchase Order Tracking
+- Passwords
+
+Each of these level 1 tasks normally has a =property drawer=
+specifying the category for any tasks in that tree.  Level 1 headings
+are set up like this:
+
+#+begin_src org :exports src
+,* Health and Recreation
+  PROPERTIES:
+  CATEGORY: Health
+  END:
+  ...
+,* House Maintenance
+  PROPERTIES:
+  CATEGORY: House
+  END:
+#+end_src
+** Key bindings
+:PROPERTIES:
+:CUSTOM_ID: KeyBindings
+:END:
+
+I live in the agenda.  To make getting to the agenda faster I mapped
+=F12= to the sequence =C-c a= since I'm using it hundreds of times a
+day.
+
+I have the following custom key bindings set up for my emacs (sorted by frequency).
+
+| Key     | For                                             | Used       |
+|---------+-------------------------------------------------+------------|
+| F12     | Agenda (1 key less than C-c a)                  | Very Often |
+| C-c b   | Switch to org file                              | Very Often |
+| F11     | Goto currently clocked item                     | Very Often |
+| C-M-r   | Capture a task                                  | Very Often |
+| C-F11   | Clock in a task (show menu with prefix)         | Often      |
+| f9 g    | Gnus - I check mail regularly                   | Often      |
+| f5      | Show todo items for this subtree                | Often      |
+| S-f5    | Widen                                           | Often      |
+| f9 b    | Quick access to bbdb data                       | Often      |
+| f9 c    | Calendar access                                 | Often      |
+| C-S-f12 | Save buffers and publish current project        | Often      |
+| C-c l   | Store a link for retrieval with C-c C-l         | Often      |
+| f8      | Go to next org file in org-agenda-files         | Sometimes  |
+| f9 r    | Boxquote selected region                        | Sometimes  |
+| f9 t    | Insert inactive timestamp                       | Sometimes  |
+| f9 v    | Toggle visible mode (for showing/editing links) | Sometimes  |
+| C-f9    | Previous buffer                                 | Sometimes  |
+| C-f10   | Next buffer                                     | Sometimes  |
+| C-x n r | Narrow to region                                | Sometimes  |
+| f9 f    | Boxquote insert a file                          | Sometimes  |
+| f9 i    | Info manual                                     | Sometimes  |
+| f9 I    | Punch Clock In                                  | Sometimes  |
+| f9 O    | Punch Clock Out                                 | Sometimes  |
+| f9 o    | Switch to org scratch buffer                    | Sometimes  |
+| f9 s    | Switch to scratch buffer                        | Sometimes  |
+| C-c r   | Capture a task (from my mobile phone)           | Rare       |
+| f9 h    | Hide other tasks                                | Rare       |
+| f7      | Toggle line truncation/wrap                     | Rare       |
+| f9 T    | Tabify region                                   | Rare       |
+| f9 U    | Untabify region                                 | Rare       |
+| C-c a   | Enter Agenda (minimal emacs testing)            | Rare       |
+
+Here is the keybinding setup in lisp:
+#+header: :tangle yes
+#+begin_src emacs-lisp
+;; Custom Key Bindings
+(global-set-key (kbd "<f12>") 'org-agenda)
+(global-set-key (kbd "<f5>") 'bh/org-todo)
+(global-set-key (kbd "<S-f5>") 'bh/widen)
+(global-set-key (kbd "<f7>") 'bh/set-truncate-lines)
+(global-set-key (kbd "<f8>") 'org-cycle-agenda-files)
+(global-set-key (kbd "<f9> <f9>") 'bh/show-org-agenda)
+(global-set-key (kbd "<f9> b") 'bbdb)
+(global-set-key (kbd "<f9> c") 'calendar)
+(global-set-key (kbd "<f9> f") 'boxquote-insert-file)
+(global-set-key (kbd "<f9> g") 'gnus)
+(global-set-key (kbd "<f9> h") 'bh/hide-other)
+(global-set-key (kbd "<f9> n") 'org-narrow-to-subtree)
+(global-set-key (kbd "<f9> w") 'widen)
+(global-set-key (kbd "<f9> u") 'bh/narrow-up-one-level)
+
+(global-set-key (kbd "<f9> I") 'bh/punch-in)
+(global-set-key (kbd "<f9> O") 'bh/punch-out)
+
+(global-set-key (kbd "<f9> o") 'bh/make-org-scratch)
+
+(global-set-key (kbd "<f9> r") 'boxquote-region)
+(global-set-key (kbd "<f9> s") 'bh/switch-to-scratch)
+
+(global-set-key (kbd "<f9> t") 'bh/insert-inactive-timestamp)
+(global-set-key (kbd "<f9> T") 'tabify)
+(global-set-key (kbd "<f9> U") 'untabify)
+
+(global-set-key (kbd "<f9> v") 'visible-mode)
+(global-set-key (kbd "<f9> SPC") 'bh/clock-in-last-task)
+(global-set-key (kbd "C-<f9>") 'previous-buffer)
+(global-set-key (kbd "M-<f9>") 'org-toggle-inline-images)
+(global-set-key (kbd "C-x n r") 'narrow-to-region)
+(global-set-key (kbd "C-<f10>") 'next-buffer)
+(global-set-key (kbd "<f11>") 'org-clock-goto)
+(global-set-key (kbd "C-<f11>") 'org-clock-in)
+(global-set-key (kbd "C-s-<f12>") 'bh/save-then-publish)
+(global-set-key (kbd "C-M-r") 'org-capture)
+(global-set-key (kbd "C-c r") 'org-capture)
+
+(defun bh/hide-other ()
+  (interactive)
+  (save-excursion
+    (org-back-to-heading 'invisible-ok)
+    (hide-other)
+    (org-cycle)
+    (org-cycle)
+    (org-cycle)))
+
+(defun bh/set-truncate-lines ()
+  "Toggle value of truncate-lines and refresh window display."
+  (interactive)
+  (setq truncate-lines (not truncate-lines))
+  ;; now refresh window display (an idiom from simple.el):
+  (save-excursion
+    (set-window-start (selected-window)
+                      (window-start (selected-window)))))
+
+(defun bh/make-org-scratch ()
+  (interactive)
+  (find-file "/tmp/publish/scratch.org")
+  (gnus-make-directory "/tmp/publish"))
+
+(defun bh/switch-to-scratch ()
+  (interactive)
+  (switch-to-buffer "*scratch*"))
+#+end_src
+
+The main reason I have special key bindings (like =F11=, and =F12=) is
+so that the keys work in any mode.  If I'm in the Gnus summary buffer
+then =C-u C-c C-x C-i= doesn't work, but the =C-F11= key combination
+does and this saves me time since I don't have to visit an org-mode
+buffer first just to clock in a recent task.
+
+*** Org mode setup
+#+begin_src emacs-lisp
+  ;; Standard key bindings
+  (global-set-key "\C-cl" 'org-store-link)
+  (global-set-key "\C-ca" 'org-agenda)
+  (global-set-key "\C-cb" 'org-iswitchb)
+#+end_src
+
 *** Keybindings
 #+BEGIN_SRC emacs-lisp
   ;; Custom Key Bindings
@@ -970,12 +1205,4 @@ since they are now projects and not tasks.
   
   (add-hook 'org-after-todo-state-change-hook 'bh/mark-next-parent-tasks-todo 'append)
   (add-hook 'org-clock-in-hook 'bh/mark-next-parent-tasks-todo 'append)
-#+end_src
-
-*** Yasnippet
-Turn it on when in org-mode.
-#+begin_src emacs-lisp
-  ;; (add-hook 'org-mode-hook
-  ;;           '(lambda ()
-  ;;              (yas-minor-mode)))
 #+end_src
