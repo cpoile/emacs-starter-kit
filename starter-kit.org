@@ -293,7 +293,6 @@ And we have to setq yas-snippet-dirs early because packages autoloaded in the st
 #+end_src
 
 
-
 *** Function for loading/compiling starter-kit-*
 #+srcname: starter-kit-load
 #+begin_src emacs-lisp 
@@ -436,8 +435,8 @@ load the yasnippet bundle in [[file:starter-kit-yasnippet.org][starter-kit-snipp
 ;;(starter-kit-load "starter-kit-yasnippet.org")
 #+end_src
 
-
 *** Starter kit Org-mode
+
 Located in [[file:starter-kit-org.org][starter-kit-org]]
 
 #+begin_src emacs-lisp
