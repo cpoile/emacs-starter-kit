@@ -716,6 +716,97 @@ name: final-custom
        (define-key paredit-mode-map (kbd "<C-right>") 'paredit-forward)
        (define-key paredit-mode-map (kbd "<C-left>")  'paredit-backward)))
 #+end_src
+*** nrepl settings
+#+source: nrepl-settings
+#+begin_src emacs-lisp
+  (require 'clojure-test-mode)
+  (require 'ac-nrepl)
+  (add-hook 'nrepl-mode-hook 'ac-nrepl-setup)
+  (add-hook 'nrepl-interaction-mode-hook 'ac-nrepl-setup)
+  (eval-after-load "auto-complete"
+    '(add-to-list 'ac-modes 'nrepl-mode))  
+  
+  (defun set-auto-complete-as-completion-at-point-function ()
+    (setq completion-at-point-functions '(auto-complete)))
+  (add-hook 'auto-complete-mode-hook 'set-auto-complete-as-completion-at-point-function)
+  
+  (add-hook 'nrepl-interaction-mode-hook 'set-auto-complete-as-completion-at-point-function)
+  
+  (defun nrepl-common-hook ()
+    (set-auto-complete-as-completion-at-point-function)
+    (nrepl-turn-on-eldoc-mode))
+  
+  (add-hook 'nrepl-mode-hook 'nrepl-common-hook)
+  (add-hook 'nrepl-interaction-mode-hook 'nrepl-common-hook)
+  
+  (eval-after-load 'nrepl
+    '(progn 
+       (define-key nrepl-interaction-mode-map (kbd "C-c C-d") 'ac-nrepl-popup-doc)))
+  
+#+end_src
+*** Setup nrepl javadocs
+The user-javadoc-alist variable is defined in the machine-specific username.el file.
+
+#+source: nrepl-javadocs
+#+begin_src emacs-lisp
+
+(defvar user-javadoc-alist nil
+  "Defines list of javadoc root paths. This variable is machine specific, can be defined in `custom-init-before-file' init file."
+  ;; Example :
+  ;; (setq user-javadoc-alist
+  ;;   '(("^\\(java[x]?\.\\|org\.ietf\.\\|org\.omg\.\\|org\.w3c\.\\|org\.xml\.\\)" .
+  ;;   "file:///opt/javadoc/jdk7/docs/api/"  )))
+  )
+  
+  ;;; JavaDoc browsing from nrepl
+  (defvar javadoc-alist
+    '(("^\\(java[x]?\.\\|org\.ietf\.\\|org\.omg\.\\|org\.w3c\.\\|org\.xml\.\\)" .
+       "/java/docs/api/")))
+  
+  (defun attach-user-javadocs ()
+    "Attach user defined javadocs."
+    (if user-javadoc-alist
+        (dolist (el user-javadoc-alist javadoc-alist)
+          (setq javadoc-alist (cons el javadoc-alist)))
+      )
+    )
+  ;; load user defined settings
+  (attach-user-javadocs)
+  
+  (defun javadoc-root (sym)
+    (let ((m (find-if (lambda (x) (string-match (car x) sym)) javadoc-alist)))
+      (when m (cdr m))))
+  
+  (defun my-nrepl-javadoc (class-name)
+    "Get JavaDoc documentation on Java class at point."
+    (interactive (list
+                  (cond
+                   ((nrepl-connection-buffer-name)
+                    (or (second (nrepl-eval
+                                 (format "%s" (list 'resolve
+                                                    (list 'quote
+                                                          (make-symbol
+                                                           (substring-no-properties
+                                                            (symbol-name
+                                                             (symbol-at-point)))))
+                                                    ))
+                                 ))
+                        (symbol-name (nrepl-read-symbol-name "JavaDoc info for: "))))
+  
+                   ((ignore-errors (mark))
+                    (buffer-substring-no-properties (region-beginning) (region-end)))
+  
+                   (t (symbol-name (symbol-at-point))))))
+    (or class-name (error "No symbol given"))
+    (let* ((root (and class-name (javadoc-root class-name)))
+           (dots-to-slashes (subst-char-in-string ?. ?/ class-name))
+           (canon-class-name (subst-char-in-string ?$ ?. dots-to-slashes)))
+      (if (and root canon-class-name)
+          (browse-url (concat root canon-class-name ".html"))
+        (message "No javadoc found for %s" class-name))))
+  
+#+end_src
+
 *** Remove '^M' dos eol characters
 In mixed dos/unix files and buffers (like NRepl)
 #+source: remove-^M
@@ -727,14 +818,7 @@ In mixed dos/unix files and buffers (like NRepl)
     (aset buffer-display-table ?\^M []))
   
   (add-hook 'nrepl-mode-hook 'remove-dos-eol)
-  (add-hook 'nrepl-connections-buffer-mode-hook 'remove-dos-eol)
-#+end_src
-*** nrepl settings
-#+source: nrepl-settings
-#+begin_src emacs-lisp
-  (add-hook 'nrepl-interaction-mode-hook
-            'nrepl-turn-on-eldoc-mode)
-  ;(define-key nrepl-interaction-mode-map (kbd "C-c C-d") 'ac-nrepl-popup-doc)
+  (add-hook 'nrepl-popup-buffer-mode-hook 'remove-dos-eol)
 #+end_src
 ** ERC
 *** Ignore quit join part messages
