@@ -19,7 +19,7 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 
 *** Load RefTeX
 #+srcname: reftex-support
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)   ; with AUCTeX LaTeX mode
   (autoload 'reftex-mode     "reftex" "RefTeX Minor Mode" t)
   (autoload 'turn-on-reftex  "reftex" "RefTeX Minor Mode" nil)
@@ -94,14 +94,15 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 *** Use pdfLaTeX
     - Take this out to compile to DVI, instead.
 #+srcname: pdf-mode
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
       (add-hook 'LaTeX-mode-hook 'TeX-PDF-mode)
 #+end_src
 
 *** Configure Biber
 Allow AucTeX to use biber as well as/instead of bibtex.
 #+source: setup-biber
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
     ;; Biber under AUCTeX
     (defun TeX-run-Biber (name command file)
       "Create a process for NAME using COMMAND to format FILE with Biber." 
@@ -158,7 +159,8 @@ Allow AucTeX to use biber as well as/instead of bibtex.
       default as it should be added to the user's personal
       configuration as needed.
 #+srcname: set-exec-path
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
       (setenv "PATH" (concat "/usr/texbin:" (getenv "PATH")))
 #+end_src
 
@@ -172,7 +174,8 @@ Allow AucTeX to use biber as well as/instead of bibtex.
       turned off be default as it should be configured by the user in
       a personal file/directory.
 #+srcname: default-bibliography
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
   (setq reftex-default-bibliography
         (quote
          ("user.bib" "local.bib")))
@@ -181,7 +184,7 @@ Allow AucTeX to use biber as well as/instead of bibtex.
 ** Configure Org-babel
    - Add LaTeX to the list of languages Org-babel will recognize.
 #+srcname: add-latex
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
      (require 'ob-latex)
   ;; (org-babel-add-interpreter "latex")
   ;; (add-to-list 'org-babel-tangle-langs '("latex" "tex"))

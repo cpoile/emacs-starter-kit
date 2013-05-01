@@ -27,7 +27,8 @@ supplied by the Python distribution itself.
 #+end_src
 
 In your personal configuration, add something like this to use IPython:
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
 (python-use-ipython "/usr/local/bin/ipython" '("-colors" "LightBG" "-nobanner"))
 #+end_src
 

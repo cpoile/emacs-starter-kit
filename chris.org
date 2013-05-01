@@ -78,15 +78,16 @@ Fullscreen toggle -- Only works with the (now slightly out-of-date)
 patched emacs build at =git://github.com/typester/emacs.git=.
 
 #+source: fullscreen-2
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
   (global-set-key (kbd "C-c m") 'ns-toggle-fullscreen)
 #+end_src
 
 **** Option 3  
 Fullscreen toggle using maxframe.el. 
 #+source: fullscreen-3
-#+begin_src emacs-lisp :tangle no
-  
+#+header: :tangle no
+#+begin_src emacs-lisp
  (require 'maxframe)
  (defvar my-fullscreen-p t "Check if fullscreen is on or off")
  (defun my-toggle-fullscreen ()
@@ -103,7 +104,8 @@ For use with Yamamoto Mitsuharu's Carbon-patched Emacs. (This is
     what I use, but it requires you compile a custom Emacs.)
 
 #+source: fullscreen-4
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
     (defun fullscreen (&optional f)
       (interactive)
       (set-frame-parameter f 'fullscreen
@@ -115,7 +117,8 @@ For use with Yamamoto Mitsuharu's Carbon-patched Emacs. (This is
 **** Option 5  
 Internal to emacs; also seems not to work on OS X.
 #+source: fullscreen-5
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
  (defun toggle-fullscreen (&optional f)
     (interactive)
     (let ((current-value (frame-parameter nil 'fullscreen)))
@@ -131,7 +134,8 @@ Internal to emacs; also seems not to work on OS X.
     Used with Mitsuharu Yamamoto's carbon-patched Emacs, which turns
     off support for default mac bindings. Turned off by default.
 #+srcname: mac-keys
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
    (require 'mac-key-mode)
    (mac-key-mode 1)
    (add-hook 'mac-key-mode-hook
@@ -166,7 +170,8 @@ In dired mode, visit all marked files using. Bound to the "F" key.
 
 *** Stripe Dired buffers
 #+name: stripe-dired
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
 (require 'stripe-buffer)
 (add-hook 'org-mode-hook 'org-table-stripes-enable)
 (add-hook 'dired-mode-hook 'stripe-listify-buffer)  
@@ -262,7 +267,7 @@ In dired mode, visit all marked files using. Bound to the "F" key.
 | C-x <right>   | go forward in (buffer-local) `mark-ring`                   |
 |---------------+------------------------------------------------------------|
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;; get some IntelliJ-style back-forward movement between marks in a file, or globally
   (require 'smartrep)
   (require 'nav-flash)
@@ -349,7 +354,7 @@ In dired mode, visit all marked files using. Bound to the "F" key.
   (setq scroll-bar-mode nil)
 #+end_src
 *** Autosave
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (setq
    backup-by-copying t      ; don't clobber symlinks
    delete-old-versions t
@@ -381,58 +386,65 @@ In dired mode, visit all marked files using. Bound to the "F" key.
   (wg-load "~/Documents/Emacs - setup - reference/workgroups/workgroups")
 #+end_src
 *** Use ido-imenu to search local tags
+#+begin_src emacs-lisp
+  (defun ido-goto-symbol (&optional symbol-list)
+       "Refresh imenu and jump to a place in the buffer using Ido."
+       (interactive)
+       (unless (featurep 'imenu)
+         (require 'imenu nil t))
+       (cond
+        ((not symbol-list)
+         (let ((ido-mode ido-mode)
+               (ido-enable-flex-matching
+                (if (boundp 'ido-enable-flex-matching)
+                    ido-enable-flex-matching t))
+               name-and-pos symbol-names position)
+           (unless ido-mode
+             (ido-mode 1)
+             (setq ido-enable-flex-matching t))
+           (while (progn
+                    (imenu--cleanup)
+                    (setq imenu--index-alist nil)
+                    (ido-goto-symbol (imenu--make-index-alist))
+                    (setq selected-symbol
+                          (ido-completing-read "Symbol? " symbol-names))
+                    (string= (car imenu--rescan-item) selected-symbol)))
+           (unless (and (boundp 'mark-active) mark-active)
+             (push-mark nil t nil))
+           (setq position (cdr (assoc selected-symbol name-and-pos)))
+           (cond
+            ((overlayp position)
+             (goto-char (overlay-start position)))
+            (t
+             (goto-char position)))))
+        ((listp symbol-list)
+         (dolist (symbol symbol-list)
+           (let (name position)
+             (cond
+              ((and (listp symbol) (imenu--subalist-p symbol))
+               (ido-goto-symbol symbol))
+              ((listp symbol)
+               (setq name (car symbol))
+               (setq position (cdr symbol)))
+              ((stringp symbol)
+               (setq name symbol)
+               (setq position
+                     (get-text-property 1 'org-imenu-marker symbol))))
+             (unless (or (null position) (null name)
+                         (string= (car imenu--rescan-item) name))
+               (add-to-list 'symbol-names name)
+               (add-to-list 'name-and-pos (cons name position))))))))
+     (global-set-key "\C-ci" 'ido-goto-symbol) ; or any key you see fit
+#+END_SRC
+
     From: http://www.masteringemacs.org/articles/2011/01/14/effective-editing-movement/ which referenced: http://www.emacswiki.org/emacs/ImenuMode#toc10
 
-#+BEGIN_SRC emacs-lisp
- (defun ido-goto-symbol (&optional symbol-list)
-      "Refresh imenu and jump to a place in the buffer using Ido."
-      (interactive)
-      (unless (featurep 'imenu)
-        (require 'imenu nil t))
-      (cond
-       ((not symbol-list)
-        (let ((ido-mode ido-mode)
-              (ido-enable-flex-matching
-               (if (boundp 'ido-enable-flex-matching)
-                   ido-enable-flex-matching t))
-              name-and-pos symbol-names position)
-          (unless ido-mode
-            (ido-mode 1)
-            (setq ido-enable-flex-matching t))
-          (while (progn
-                   (imenu--cleanup)
-                   (setq imenu--index-alist nil)
-                   (ido-goto-symbol (imenu--make-index-alist))
-                   (setq selected-symbol
-                         (ido-completing-read "Symbol? " symbol-names))
-                   (string= (car imenu--rescan-item) selected-symbol)))
-          (unless (and (boundp 'mark-active) mark-active)
-            (push-mark nil t nil))
-          (setq position (cdr (assoc selected-symbol name-and-pos)))
-          (cond
-           ((overlayp position)
-            (goto-char (overlay-start position)))
-           (t
-            (goto-char position)))))
-       ((listp symbol-list)
-        (dolist (symbol symbol-list)
-          (let (name position)
-            (cond
-             ((and (listp symbol) (imenu--subalist-p symbol))
-              (ido-goto-symbol symbol))
-             ((listp symbol)
-              (setq name (car symbol))
-              (setq position (cdr symbol)))
-             ((stringp symbol)
-              (setq name symbol)
-              (setq position
-                    (get-text-property 1 'org-imenu-marker symbol))))
-            (unless (or (null position) (null name)
-                        (string= (car imenu--rescan-item) name))
-              (add-to-list 'symbol-names name)
-              (add-to-list 'name-and-pos (cons name position))))))))
-    (global-set-key "\C-ci" 'ido-goto-symbol) ; or any key you see fit
-#+END_SRC
+*** IDO-mode settings
+#+source: ido-mode-settings
+#+begin_src emacs-lisp
+  (setq ido-case-fold t)
+#+end_src
+
 *** Custom misc keymaps
 #+source: custom-keymaps
 #+begin_src emacs-lisp
@@ -477,7 +489,8 @@ Located: [[file:my-org-mode-setup.org
     Redefine TeX-open-quote and TeX-close-quote to be smart quotes by default. Below, in the local org-mode settings, we'll also map the relevant function to a key we can use in org-mode, too. If you don't use XeLaTeX for processing all your =.tex= files, you should disable this option.
 
 #+source: smart-quotes
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
   (setq TeX-open-quote "“")
   (setq TeX-close-quote "”")
 #+end_src
@@ -486,7 +499,8 @@ Located: [[file:my-org-mode-setup.org
 Set up AUCTeX to work with the Skim PDF viewer.
 
 #+srcname: local-loadpath
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
    ;; Synctex with Skim
    ;;(add-hook 'TeX-mode-hook
    ;;(lambda ()
@@ -508,7 +522,7 @@ Set up AUCTeX to work with the Skim PDF viewer.
 Tell RefTeX where the bibliography files are. 
 
 #+srcname: local-reftex
-#+begin_src emacs-lisp  
+#+begin_src emacs-lisp
   ;; Make RefTex able to find my local bib files
   (setq reftex-bibpath-environment-variables
         '("~/Documents/TeX-bibs"))
@@ -563,7 +577,7 @@ Tell RefTeX where the bibliography files are.
 
 ** Local Pandoc Support 
 #+src-name: pandoc_mode
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
  (load "pandoc-mode")
  (add-hook 'markdown-mode-hook 'turn-on-pandoc)
  (add-hook 'pandoc-mode-hook 'pandoc-load-default-settings)
@@ -574,7 +588,7 @@ Tell RefTeX where the bibliography files are.
    elsewhere in the starter kit. Add local configuration here, e.g.,
    display categories.
 #+srcname: iBuffer-custom
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (setq ibuffer-saved-filter-groups
       '(("home"
 	 ("emacs-config" (or (filename . ".emacs.d")
@@ -603,7 +617,7 @@ Tell RefTeX where the bibliography files are.
 
 ** Pomodoro
 *** Setup
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (require 'pomodoro)
   (pomodoro-add-to-mode-line)
 #+END_SRC
@@ -749,7 +763,6 @@ The user-javadoc-alist variable is defined in the machine-specific username.el f
 
 #+source: nrepl-javadocs
 #+begin_src emacs-lisp
-
 (defvar user-javadoc-alist nil
   "Defines list of javadoc root paths. This variable is machine specific, can be defined in `custom-init-before-file' init file."
   ;; Example :
@@ -819,6 +832,7 @@ In mixed dos/unix files and buffers (like NRepl)
   
   (add-hook 'nrepl-mode-hook 'remove-dos-eol)
   (add-hook 'nrepl-popup-buffer-mode-hook 'remove-dos-eol)
+  (add-hook 'Info-mode-hook 'remove-dos-eol)
 #+end_src
 ** ERC
 *** Ignore quit join part messages

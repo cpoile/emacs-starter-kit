@@ -17,18 +17,15 @@ Instead of putting these in every org file, put it here once.
 When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by default. 
 
 #+source: org-mode-smartquote-key
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
   (add-hook 'org-mode-hook 'smart-quote-keys)
   
   (defun smart-quote-keys ()
     (require 'typopunct)
     (typopunct-change-language 'english)
     (local-set-key (kbd "C-c \'") 'typopunct-insert-single-quotation-mark)
-    (local-set-key (kbd "C-c \"") 'typopunct-insert-quotation-mark)
-    )
-    
-  
-  
+    (local-set-key (kbd "C-c \"") 'typopunct-insert-quotation-mark))
 #+end_src
 
 *** Archive Settings
@@ -58,8 +55,20 @@ When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by defa
    Configure org-mode so that when you edit source code in an indirect buffer (with C-c '), the buffer is opened in the current window. That way, your window organization isn't broken when switching.
 
 #+source: orgmode-indirect-buffer-settings
+#+header: :tangle yes
 #+begin_src emacs-lisp
   (setq org-src-window-setup 'current-window)
+#+end_src
+
+*** Exporter updates for Org 8.0
+Tue Apr 30 16:23:54 2013
+
+We now need to explicitly load required exporters
+
+#+begin_src emacs-lisp
+(require 'ox-html)
+(require 'ox-latex)
+(require 'ox-ascii)
 #+end_src
 
 *** XeLaTeX and pdfLaTeX Export Settings
@@ -68,108 +77,106 @@ When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by defa
    setup in each case. There is a good deal of local stuff in this section. The required style files used below are available at https://github.com/kjhealy/latex-custom-kjh. You may need to adjust or remove some of these settings depending on your
    preferences and local configuration.
 
-   This is the new version added by cpoile
 #+source: orgmode-latex-export
 #+begin_src emacs-lisp
-        (require 'org-latex)
-      
-      ;; turn off the default toc behavior; deal with it properly in headers to files.
-      (defun org-export-latex-no-toc (depth)  
-          (when depth
-            (format "%% Org-mode is exporting headings to %s levels.\n"
-                    depth)))
-      (setq org-export-latex-format-toc-function 'org-export-latex-no-toc)
-      
-      
-        (unless (boundp 'org-export-latex-classes)
-          (setq org-export-latex-classes nil))
-        (add-to-list 'org-export-latex-classes
-                     '("apamanuscript"
-                       "\\documentclass[man]{apa6} \n \\input{vc} % vc package"
-                          ("\\section{%s}" . "\\section*{%s}")
-                          ("\\subsection{%s}" . "\\subsection*{%s}")
-                          ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-                          ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                          ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-        
-       (add-to-list 'org-export-latex-classes
-                     '("tuftehandout"
-                       "\\documentclass[nobib]{tufte-handout}
-                        \\usepackage{hyphenat}
-                        \\usepackage[style=apa,sortcites=true,sorting=nyt,
-                          autocite=footnote,backend=biber]{biblatex}
-                        \\usepackage{enumitem}
-                        \\setitemize{itemsep=0pt, parsep=1pt}"
-                          ("\\section{%s}" . "\\section*{%s}")
-                          ("\\subsection{%s}" . "\\subsection*{%s}")))
-        
-          ;; Originally taken from Bruno Tavernier: http://thread.gmane.org/gmane.emacs.orgmode/31150/focus=31432
-          ;; but adapted to use latexmk 4.22 or higher.  
-          (defun my-auto-tex-cmd ()
-            "When exporting from .org with latex, automatically run latex,
-                             pdflatex, or xelatex as appropriate, using latexmk."
-            (let ((texcmd)))
-            ;; default command: pdflatex 
-            (setq texcmd "latexmk -pdflatex=pdflatex -pdf -outdir=%o %f")
-            ;; pdflatex -> .pdf
-            (if (string-match "LATEX_CMD: pdflatex" (buffer-string))
-                (setq texcmd "latexmk -pdflatex=pdflatex -pdf -outdir=%o %f"))
-            ;; xelatex -> .pdf
-            (if (string-match "LATEX_CMD: xelatex" (buffer-string))
-                (setq texcmd "latexmk -pdflatex=xelatex  -pdf -output-directory %o %f"))
-            ;; LaTeX compilation command
-            (setq org-latex-to-pdf-process (list texcmd)))
-          
-          (add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-cmd)
-          
-          ;; Default packages included in /every/ tex file, latex, pdflatex or xelatex
-      ;    (setq org-export-latex-packages-alist
-      ;          '(("" "graphicx" t)
-      ;            ("" "longtable" nil)
-      ;           ("" "float" )))
-          
-          ;; Custom packages
-          (defun my-auto-tex-parameters ()
-           "Automatically select the tex packages to include. These will be in ~/Documents/texmf/tex/latex/misc"
-            ;; default packages for ordinary latex or pdflatex export
-            (setq org-export-latex-default-packages-alist
-                  '(("AUTO" "inputenc" t)
-                    ("" "org-preamble-pdflatex" t))))
-            ;; Packages to include when xelatex is used
-      ;      (if (string-match "LATEX_CMD: xelatex" (buffer-string))
-      ;          (setq org-export-latex-default-packages-alist
-                      ;;'(("minted" "org-preamble-xelatex" t) ))))
-      ;                '(("minted" "org-preamble-xelatex" t) ))))
-        
-         (add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-parameters)      
-        
+  ;; turn off the default toc behavior; deal with it properly in headers to files.
+  (defun org-latex-no-toc (depth)  
+    (when depth
+      (format "%% Org-mode is exporting headings to %s levels.\n"
+              depth)))
+  (setq org-latex-format-toc-function 'org-latex-no-toc)
+  
+  
+  (unless (boundp 'org-latex-classes)
+    (setq org-latex-classes nil))
+  (add-to-list 'org-latex-classes
+               '("apamanuscript"
+                 "\\documentclass[man]{apa6} \n \\input{vc} % vc package"
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+  
+  (add-to-list 'org-latex-classes
+               '("tuftehandout"
+                 "\\documentclass[nobib]{tufte-handout}
+                    \\usepackage{hyphenat}
+                    \\usepackage[style=apa,sortcites=true,sorting=nyt,
+                    autocite=footnote,backend=biber]{biblatex}
+                    \\usepackage{enumitem}
+                    \\setitemize{itemsep=0pt, parsep=1pt}"
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")))
+  
+  ;; Originally taken from Bruno Tavernier: http://thread.gmane.org/gmane.emacs.orgmode/31150/focus=31432
+  ;; but adapted to use latexmk 4.22 or higher.  
+  (defun my-auto-tex-cmd ()
+    "When exporting from .org with latex, automatically run latex,
+                         pdflatex, or xelatex as appropriate, using latexmk."
+    (let ((texcmd)))
+    ;; default command: pdflatex 
+    (setq texcmd "latexmk -pdflatex=pdflatex -pdf -outdir=%o %f")
+    ;; pdflatex -> .pdf
+    (if (string-match "LATEX_CMD: pdflatex" (buffer-string))
+        (setq texcmd "latexmk -pdflatex=pdflatex -pdf -outdir=%o %f"))
+    ;; xelatex -> .pdf
+    (if (string-match "LATEX_CMD: xelatex" (buffer-string))
+        (setq texcmd "latexmk -pdflatex=xelatex  -pdf -output-directory %o %f"))
+    ;; LaTeX compilation command
+    (setq org-latex-to-pdf-process (list texcmd)))
+  
+  (add-hook 'org-latex-after-initial-vars-hook 'my-auto-tex-cmd)
+  
+  ;; Default packages included in /every/ tex file, latex, pdflatex or xelatex
+                                          ;    (setq org-latex-packages-alist
+                                          ;          '(("" "graphicx" t)
+                                          ;            ("" "longtable" nil)
+                                          ;           ("" "float" )))
+  
+  ;; Custom packages
+  (defun my-auto-tex-parameters ()
+    "Automatically select the tex packages to include. These will be in ~/Documents/texmf/tex/latex/misc"
+    ;; default packages for ordinary latex or pdflatex export
+    (setq org-latex-default-packages-alist
+          '(("AUTO" "inputenc" t)
+            ("" "org-preamble-pdflatex" t))))
+  ;; Packages to include when xelatex is used
+                                          ;      (if (string-match "LATEX_CMD: xelatex" (buffer-string))
+                                          ;          (setq org-latex-default-packages-alist
+  ;;'(("minted" "org-preamble-xelatex" t) ))))
+                                          ;                '(("minted" "org-preamble-xelatex" t) ))))
+  
+  (add-hook 'org-latex-after-initial-vars-hook 'my-auto-tex-parameters)      
+  
 #+end_src
 
-
+*** Old version of orgmode-latex-export
 #+source: orgmode-xelatex-export
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
   (require 'org-latex)   
     ;; Choose either listings or minted for exporting source code blocks.
     ;; Using minted (as here) requires pygments be installed. To use the
     ;; default listings package instead, use
-    ;; (setq org-export-latex-listings t)
+    ;; (setq org-latex-listings t)
     ;; and change references to "minted" below to "listings"
-    (setq org-export-latex-listings 'minted)
+    (setq org-latex-listings 'minted)
     
     ;; default settings for minted code blocks
-    (setq org-export-latex-minted-options
+    (setq org-latex-minted-options
           '(;("frame" "single")
             ("bgcolor" "bg") ; bg will need to be defined in the preamble of your document. It's defined in org-preamble-pdflatex.sty and org-preamble-xelatex.sty below.
             ("fontsize" "\\small")
             ))
   ;; turn off the default toc behavior; deal with it properly in headers to files.
-  (defun org-export-latex-no-toc (depth)  
+  (defun org-latex-no-toc (depth)  
       (when depth
         (format "%% Org-mode is exporting headings to %s levels.\n"
                 depth)))
-  (setq org-export-latex-format-toc-function 'org-export-latex-no-toc)
+  (setq org-latex-format-toc-function 'org-latex-no-toc)
   
-    (add-to-list 'org-export-latex-classes
+    (add-to-list 'org-latex-classes
                  '("memarticle"
                    "\\documentclass[11pt,oneside,article]{memoir}\n   %\\input{vc} % vc package; removed for now"
                     ("\\section{%s}" . "\\section*{%s}")
@@ -178,7 +185,7 @@ When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by defa
                     ("\\paragraph{%s}" . "\\paragraph*{%s}")
                     ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
     
-    (add-to-list 'org-export-latex-classes
+    (add-to-list 'org-latex-classes
                  '("membook"
                    "\\documentclass[11pt,oneside]{memoir}\n       %\\input{vc} % vc package; removed for now"
                    ("\\chapter{%s}" . "\\chapter*{%s}")
@@ -203,10 +210,10 @@ When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by defa
       ;; LaTeX compilation command
       (setq org-latex-to-pdf-process (list texcmd)))
     
-    (add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-cmd)
+    (add-hook 'org-latex-after-initial-vars-hook 'my-auto-tex-cmd)
     
     ;; Default packages included in /every/ tex file, latex, pdflatex or xelatex
-    (setq org-export-latex-packages-alist
+    (setq org-latex-packages-alist
           '(("" "graphicx" t)
             ("" "longtable" nil)
             ("" "float" )))
@@ -215,21 +222,22 @@ When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by defa
     (defun my-auto-tex-parameters ()
       "Automatically select the tex packages to include. See https://github.com/kjhealy/latex-custom-kjh for the support files included here."
       ;; default packages for ordinary latex or pdflatex export
-      (setq org-export-latex-default-packages-alist
+      (setq org-latex-default-packages-alist
             '(("AUTO" "inputenc" t)
               ("minted,minion" "org-preamble-pdflatex" t)))        
       ;; Packages to include when xelatex is used
       (if (string-match "LATEX_CMD: xelatex" (buffer-string))
-          (setq org-export-latex-default-packages-alist
+          (setq org-latex-default-packages-alist
                 '(("minted" "org-preamble-xelatex" t) ))))
     
-    (add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-parameters)      
+    (add-hook 'org-latex-after-initial-vars-hook 'my-auto-tex-parameters)      
 #+End_src
 
 *** ebib and citation settings
     ebib is a bibtex database manager that works inside emacs. It can
     talk to org-mode. See [[http://orgmode.org/worg/org-tutorials/org-latex-export.html#sec-17_2][this Worg tutorial]] for details. 
 #+source: ebib-setup
+#+header: :tangle yes
 #+begin_src emacs-lisp
     (org-add-link-type "ebib" 'ebib)
   
@@ -324,10 +332,11 @@ When in an org-mode buffer, bind TeX-insert-quote to =C-c "=. Turned off by defa
   )))))   
 #+end_src
 
-*** HTML export Settings
+*** HTML export Settings (not tangled)
 Create =html= files form the =org= sources, to help with documentation. To set up org-mode for publishing projects to HTML you will need to change these settings, as they apply only to the Starter Kit. 
 
 #+source: html-export-settings
+#+header: :tangle no
 #+begin_src emacs-lisp
   (setq org-publish-project-alist
          '(("org"
@@ -342,14 +351,15 @@ Create =html= files form the =org= sources, to help with documentation. To set u
                    href=\"http://kieranhealy.org/stylesheets/screen.css\"
                    type=\"text/css\"/>")))
   
-    (setq org-export-html-style-extra "") 
+    (setq org-html-head-extra "") 
     (setq org-export-html-postamble nil)
   
 #+end_src
 
 *** Org-babel and clojure
 Not working yet, as far as I can tell...
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
 ;; Patch ob-clojure to work with nrepl
 (declare-function nrepl-send-string-sync "ext:nrepl" (code &optional ns))
 
@@ -382,6 +392,7 @@ This is probably what we want to diff.
 
 Here is cpoile's custom =org-agenda-files= setup.
 
+#+header: :tangle yes
 #+begin_src emacs-lisp
   (setq org-user-agenda-files (quote ("~/Documents/org/agenda"
                                  ;;"~/Documents/org/client1"  
@@ -391,6 +402,7 @@ Here is cpoile's custom =org-agenda-files= setup.
 
 Here is my current =org-agenda-files= setup.
 #+header: :tangle no
+#+header: :tangle yes
 #+begin_src emacs-lisp
 (setq org-agenda-files (quote ("~/git/org"
                                "~/git/org/client1"
@@ -541,6 +553,7 @@ I have the following custom key bindings set up for my emacs (sorted by frequenc
 
 Here is the keybinding setup in lisp:
 #+header: :tangle yes
+#+header: :tangle yes
 #+begin_src emacs-lisp
 ;; Custom Key Bindings
 (global-set-key (kbd "<f12>") 'org-agenda)
@@ -617,6 +630,7 @@ does and this saves me time since I don't have to visit an org-mode
 buffer first just to clock in a recent task.
 
 *** Org mode setup
+#+header: :tangle yes
 #+begin_src emacs-lisp
   ;; Standard key bindings
   (global-set-key "\C-cl" 'org-store-link)
@@ -625,7 +639,8 @@ buffer first just to clock in a recent task.
 #+end_src
 
 *** Keybindings
-#+BEGIN_SRC emacs-lisp
+#+header: :tangle yes
+#+begin_src emacs-lisp
   ;; Custom Key Bindings
   (global-set-key (kbd "<f12>") 'org-agenda)
   (global-set-key (kbd "<f5>") 'bh/org-todo)
@@ -696,7 +711,8 @@ buffer first just to clock in a recent task.
 
 *** todo Keywords, states, selection, triggers
 
-#+BEGIN_SRC emacs-lisp
+#+header: :tangle yes
+#+begin_src emacs-lisp
 (setq org-todo-keywords
       (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
               (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE"))))
@@ -725,7 +741,8 @@ buffer first just to clock in a recent task.
 
 *** Org Capture settings
 
-#+BEGIN_SRC emacs-lisp
+#+header: :tangle yes
+#+begin_src emacs-lisp
 (setq org-directory "~/Documents/org")
 (setq org-default-notes-file "~/Documents/org/inbox.org")
 
@@ -760,7 +777,8 @@ buffer first just to clock in a recent task.
 
 *** Refile settings
 
-#+BEGIN_SRC emacs-lisp
+#+header: :tangle yes
+#+begin_src emacs-lisp
   ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
   (setq org-refile-targets (quote ((nil :maxlevel . 9)
                                    (org-agenda-files :maxlevel . 9))))
@@ -790,6 +808,7 @@ buffer first just to clock in a recent task.
 #+END_SRC
 *** Creating a block agenda viewer
 
+#+header: :tangle yes
 #+begin_src emacs-lisp
   ;; Do not dim blocked tasks
   (setq org-agenda-dim-blocked-tasks nil)
@@ -904,6 +923,7 @@ have to call someone about something that would have a =FARM= tag but
 I can do that at home on my lunch break.  I don't physically have to
 be at the farm to make the call.
 
+#+header: :tangle yes
 #+begin_src emacs-lisp
   ; Tags with fast selection keys
   (setq org-tag-alist (quote ((:startgroup)
@@ -938,6 +958,7 @@ The first day of the week (usually Monday) I do my weekly review.
 I keep a list like this one to remind me what needs to be done.
 
 To keep the agenda fast I set
+#+header: :tangle yes
 #+begin_src emacs-lisp
   (setq org-agenda-span 'day)
 #+end_src
@@ -960,6 +981,7 @@ keep projects moving forward.
 I disable the default org-mode stuck projects agenda view with the
 following setting.
 
+#+header: :tangle yes
 #+begin_src emacs-lisp
 (setq org-stuck-projects (quote ("" nil nil "")))
 #+end_src
@@ -984,6 +1006,7 @@ follow up on the thing that I'm waiting for.
 
 I have the following helper functions defined for projects which are
 used by agenda views.
+#+header: :tangle yes
 #+begin_src emacs-lisp
 (defun bh/is-project-p ()
   "Any task with a todo keyword subtask"
@@ -1191,6 +1214,7 @@ parent tasks marked =NEXT= automagically change from =NEXT= to =TODO=
 since they are now projects and not tasks.
 #+END_QUOTE 
 
+#+header: :tangle yes
 #+begin_src emacs-lisp
   (defun bh/mark-next-parent-tasks-todo ()
     "Visit each parent task and change NEXT states to TODO"

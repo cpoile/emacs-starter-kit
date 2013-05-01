@@ -81,7 +81,8 @@ Mardown and Pandoc, as well as spellchecking and line-wrapping.
     Use cocoAspell instead of ispell. Turned off here because it loads
     too late. I had to put it in [[file:starter-kit-aspell.org][starter-kit-aspell.org]].
 #+srcname: spelling-mode
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
  (setq ispell-program-name "aspell"
       ispell-dictionary "english"
       ispell-dictionary-alist
@@ -122,7 +123,7 @@ Mardown and Pandoc, as well as spellchecking and line-wrapping.
     TextMate-like autopairing of quotes and parentheses. Trying out
     instead of Skeleton Mode. 
 #+srcname: autopair
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (require 'autopair)
   (autopair-global-mode) ;; enable autopair in all buffers 
   (setq autopair-autowrap t)
@@ -131,7 +132,8 @@ Mardown and Pandoc, as well as spellchecking and line-wrapping.
 ** Skeleton mode
    Turned off by default. Enable skeleton mode in ESS for paired insertion
 #+srcname: skeleton-mode
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
     (require 'skeleton)
     (setq skeleton-pair t)
     (defvar my-skeleton-pair-alist

@@ -18,7 +18,7 @@ which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
 #+begin_src emacs-lisp
   ;;(require 'org-install)
   (setq org-completion-use-ido t)
-  (require 'org-special-blocks)
+  ;; (require 'org-special-blocks)
   ;; (if window-system (require 'org-mouse))
   
   ;; Compatibility with WindMove
@@ -31,11 +31,17 @@ which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
 #+end_src
 
 ** Org-Mode Hook
-The latest version of yasnippets doesn't play well with Org-mode, the
-following function allows these two to play nicely together
+Make yasnippet work properly with org-mode.
 #+begin_src emacs-lisp
-  (defun yas/org-very-safe-expand ()
-    (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
+  (defun yas-org-very-safe-expand ()
+    (let ((yas-fallback-behavior 'return-nil))
+      (and (fboundp 'yas-expand) (yas-expand))))
+  
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (add-to-list 'org-tab-first-hook
+                           'yas-org-very-safe-expand)
+              ))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -51,10 +57,10 @@ following function allows these two to play nicely together
               ;; display images
               (local-set-key "\M-I" 'org-toggle-iimage-in-org)
               ;; yasnippet (using the new org-cycle hooks)
-              (make-variable-buffer-local 'yas/trigger-key)
-              (setq yas/trigger-key [tab])
-              (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
-              (define-key yas/keymap [tab] 'yas/next-field)
+              ;; (make-variable-buffer-local 'yas/trigger-key)
+              ;; (setq yas/trigger-key [tab])
+              ;; (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
+              ;; (define-key yas/keymap [tab] 'yas/next-field)
               ))
 #+end_src
 
@@ -123,7 +129,8 @@ The next block makes org-babel aware that a lower-case 'r' in a =src= block head
 
 You are encouraged to add the following to your personal configuration
 although it is not added by default as a security precaution.
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
   (setq org-confirm-babel-evaluate nil)
 #+end_src
 

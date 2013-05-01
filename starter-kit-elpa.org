@@ -19,26 +19,18 @@ The following packages will be downloaded and installed.
                                 'gist
                                 'hl-line+
                                 'idle-highlight
-                                'inf-ruby
-                                'js2-mode
                                 'magit
                                 'markdown-mode
                                 'maxframe
                                 'multiple-cursors
                                 'paredit
-                                'python
-                                'python-mode
                                 'redo+
-                                'ruby-mode
                                 's
                                 'smex
                                 'solarized-theme
-                                'tango-2-theme
                                 'textmate
                                 'yaml-mode
-                                ;;'yasnippet-bundle								
                                 'zenburn-theme
-                                ;; 'smooth-scrolling
                                 'org-bullets
                                 'wc-mode
                                 'pandoc-mode
@@ -55,7 +47,7 @@ The following packages will be downloaded and installed.
                                 'clojure-test-mode
                                 'nrepl
                                 'ac-nrepl
-                                'clojure-snippets
+                                'clojure-snippets                               
                                 )
     "Libraries that should be installed by default.")
 #+end_src
@@ -104,6 +96,7 @@ Make sure the PATH variable is set properly. (Uses exec-path-from-shell package.
 
 Workaround for an ELPA bug that people are reporting but I've been
 unable to reproduce:
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
 (autoload 'paredit-mode "paredit")
 #+end_src

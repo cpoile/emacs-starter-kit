@@ -257,7 +257,7 @@ This section contains all code implementing the Emacs Starter Kit.
 *** Load path etc.
 
 #+srcname: starter-kit-load-paths
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (setq dotfiles-dir (file-name-directory
                       (or load-file-name (buffer-file-name))))
   
@@ -273,7 +273,7 @@ These should be loaded on startup rather than autoloaded on demand
 since they are likely to be used in every session
 
 #+srcname: starter-kit-load-on-startup
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (require 'cl)
   (require 'saveplace)
   (require 'ffap)
@@ -285,17 +285,17 @@ since they are likely to be used in every session
 
 And we have to setq yas-snippet-dirs early because packages autoloaded in the starter-kit-elpa.org file will use it.
 
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (yas-global-mode 1)
   (setq yas-snippet-dirs
         '("~/.emacs.d/snippets"
           )) 
 #+end_src
 
-
 *** Function for loading/compiling starter-kit-*
+
 #+srcname: starter-kit-load
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (defun starter-kit-load (file)
     "This function is to be used to load starter-kit-*.org files."
     (org-babel-load-file (expand-file-name file
@@ -339,7 +339,7 @@ aspell workaround in [[file:starter-kit-aspell.org][starter-kit-aspell]]
 Load up [[http://tromey.com/elpa/][ELPA]], the Emacs Lisp package manager.
 
 #+srcname: starter-kit-elpa
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (require 'package)
   (setq package-archives
         '(("melpa" . "http://melpa.milkbox.net/packages/")
@@ -359,7 +359,7 @@ Load up [[http://tromey.com/elpa/][ELPA]], the Emacs Lisp package manager.
 
 Work around a bug on OS X where system-name is FQDN
 #+srcname: starter-kit-osX-workaround
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (if (eq system-type 'darwin)
       (setq system-name (car (split-string system-name "\\."))))
 #+end_src
@@ -371,7 +371,7 @@ raw emacs-lisp files or as embedded elisp in org-mode files (as done
 in this document).
 
 #+srcname: starter-kit-user/system-setup
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (setq system-specific-config (concat dotfiles-dir system-name ".el")
         system-specific-literate-config (concat dotfiles-dir system-name ".org")
         user-specific-config (concat dotfiles-dir user-login-name ".el")
@@ -429,10 +429,11 @@ These sections pertain to specific languages or modes.  Feel free to
 turn off these sections if you don't plan on using the related mode or
 language.
 
-*** Starter kit yasnippet
+*** Starter kit yasnippet (not tangled - defined above)
 load the yasnippet bundle in [[file:starter-kit-yasnippet.org][starter-kit-snippet]]
+#+header: :tangle no
 #+begin_src emacs-lisp
-;;(starter-kit-load "starter-kit-yasnippet.org")
+  (starter-kit-load "starter-kit-yasnippet.org")
 #+end_src
 
 *** Starter kit Org-mode
@@ -457,32 +458,36 @@ Located in [[file:starter-kit-lisp.org][starter-kit-lisp]]
 (starter-kit-load "starter-kit-lisp.org")
 #+end_src
 
-*** Starter kit ruby
+*** Starter kit ruby (not tangled)
 Located in [[file:starter-kit-ruby.org][starter-kit-ruby]]
 
+#+header: :tangle no
 #+begin_src emacs-lisp
 (starter-kit-load "starter-kit-ruby.org")
 #+end_src
 
-*** Starter kit JS
+*** Starter kit JS (not tangled)
 Located in [[file:starter-kit-js.org][starter-kit-js]]
 
+#+header: :tangle no
 #+begin_src emacs-lisp
 (starter-kit-load "starter-kit-js.org")
 #+end_src
 
-*** Starter Kit Perl
+*** Starter Kit Perl (not tangled)
 Located in [[file:starter-kit-perl.org][starter-kit-perl]]
 
+#+header: :tangle no
 #+begin_src emacs-lisp
 (starter-kit-load "starter-kit-perl.org")
 #+end_src
 
-*** Starter Kit Python
+*** Starter Kit Python (not tangled)
 Located in [[file:starter-kit-python.org][starter-kit-python]]
 
+#+header: :tangle no
 #+begin_src emacs-lisp
-;(starter-kit-load "starter-kit-python.org")
+  (starter-kit-load "starter-kit-python.org")
 #+end_src
 
 *** Starter Kit Latex
@@ -509,7 +514,7 @@ Located in [[file:starter-kit-text.org][starter-kit-text]]
 ** Load User/System Specific Files
 *** Settings from M-x customize
 #+srcname: m-x-customize-customizations
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (load custom-file 'noerror)
 #+end_src
 

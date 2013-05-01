@@ -111,7 +111,8 @@ by an alist, called ess-R-object-tooltip-alist.  The default is
 
 
 #+srcname: r-object-tooltips
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
   ;; the alist
   (setq ess-R-object-tooltip-alist
         '((numeric . "summary")
@@ -156,9 +157,8 @@ separate command for that. The following solution comes from [[http://blog.nguye
 Nguyen]] and allows for cacheSweave() compilation with M-n w. 
 
 #+source: ess-cacheSweave
-#+begin_src emacs-lisp :tangle no
-
-  
+#+header: :tangle no
+#+begin_src emacs-lisp
 (defun ess-swv-run-in-R2 (cmd &optional choose-process)
   "Run \\[cmd] on the current .Rnw file.  Utility function not called by user."
   (let* ((rnw-buf (current-buffer)))

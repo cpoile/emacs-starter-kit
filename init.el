@@ -73,6 +73,14 @@
   (set-face-attribute 'default nil :height 121 :font "Inconsolata"))
  )
 
+;; Before we load files, set the default header argumenst so that we
+;; don't have to specify #+header: :tangle yes for every single code
+;; block
+
+(setq org-babel-default-header-args
+      (cons '(:tangle . "yes")
+            (assq-delete-all :tangle org-babel-default-header-args)))
+
 ;; load up the main file
 (org-babel-load-file (expand-file-name "starter-kit.org" dotfiles-dir))
 

@@ -9,6 +9,9 @@ in the =doc/= directory.
 This code defines the =starter-kit-project= which is used to publish
 the documentation for the Starter Kit to html.
 
+TODO: Fix this for the new orgmode 8.0. 
+Tue Apr 30 16:52:46 2013
+
 #+begin_src emacs-lisp :results silent
   (unless (boundp 'org-publish-project-alist)
     (setq org-publish-project-alist nil))

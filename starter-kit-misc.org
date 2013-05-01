@@ -34,7 +34,7 @@ load it manually with =M-x load-theme solarized-light=.
 ** Window system 
 
 #+srcname: starter-kit-window-view-stuff
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (when window-system
     (setq frame-title-format '(buffer-file-name "%f" ("%b")))
     (tooltip-mode -1)
@@ -107,14 +107,14 @@ If launching Emacs as in windowing system, show the menu. If launching in a tty/
 
 ** Highlight matching parentheses when the point is on them.
 #+srcname: starter-kit-match-parens
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
 (show-paren-mode 1)
 #+end_src
 
 ** ido mode
 ido-mode is like magic pixie dust!
 #+srcname: starter-kit-loves-ido-mode
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (when (> emacs-major-version 21)
     (ido-mode t)
     (setq ido-enable-prefix nil
@@ -125,7 +125,7 @@ ido-mode is like magic pixie dust!
 #+end_src
 
 ** Other, spell checking, tabs, imenu and a coding hook
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
   (set-default 'indent-tabs-mode nil)
   (set-default 'indicate-empty-lines t)
   (set-default 'imenu-auto-rescan t)
@@ -160,7 +160,8 @@ possible fix.
 
 **** Emacs set path to aspell
 it's possible aspell isn't in your path
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
   (setq exec-path (append exec-path '("/opt/local/bin")))
 #+end_src
 
@@ -168,7 +169,8 @@ it's possible aspell isn't in your path
 - This didn't work at first, possibly because cocoAspell was
   building its dictionary.  Now it seems to work fine.
 - (Don't need this in windows)
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
   (setq ispell-program-name "aspell"
         ispell-dictionary "english"
         ispell-dictionary-alist
@@ -212,7 +214,8 @@ it's possible aspell isn't in your path
 ** Cosmetics
 This is turned off, as the color theme handles it.
 
-#+begin_src emacs-lisp :tangle no
+#+header: :tangle no
+#+begin_src emacs-lisp
   (eval-after-load 'diff-mode
     '(progn
        (set-face-foreground 'diff-added "green4")

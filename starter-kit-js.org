@@ -14,13 +14,18 @@ Java-script Helpers
                              nil)))))
 #+end_src
 
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
 (font-lock-add-keywords 'espresso-mode
                         '(("\\<\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\):"
                            1 font-lock-warning-face t)))
 #+end_src
 
-#+begin_src emacs-lisp 
+ritenar ariten #+begin_src emacs-lisp 
+irasten  #+begin_src emacs-lisp :tangle  oainraoitenrat os
+ 
+#\+begin_src emacs-lisp( :tangle yes|)
+ 
+#+begin_src emacs-lisp
 (autoload 'espresso-mode "espresso" "Start espresso-mode" t)
 (add-to-list 'auto-mode-alist '("\\.js$" . espresso-mode))
 (add-to-list 'auto-mode-alist '("\\.json$" . espresso-mode))
@@ -31,6 +36,7 @@ Java-script Helpers
 (setq espresso-indent-level 2)
 #+end_src
 
+#+header: :tangle no
 #+begin_src emacs-lisp
 (defun starter-kit-pp-json ()
   "Pretty-print the json object following point."
